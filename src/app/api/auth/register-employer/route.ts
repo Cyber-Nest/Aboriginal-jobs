@@ -1,0 +1,106 @@
+import { NextRequest, NextResponse } from "next/server";
+
+import { connectDB } from "@/lib/db/mongoose";
+
+import { getAuth } from "@/lib/auth/auth";
+
+import { Verification } from "@/lib/models/Verification";
+import { Employer } from "@/lib/models/Employer";
+
+export async function POST(request: NextRequest) {
+  try {
+    await connectDB();
+
+    const body = await request.json();
+
+    const firstName = body.firstName?.trim();
+    const lastName = body.lastName?.trim();
+
+    const email = body.email?.toLowerCase().trim();
+
+    const password = body.password?.trim();
+
+    const orgName = body.orgName?.trim();
+
+    const province = body.province?.trim();
+
+    // Validation
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !orgName ||
+      !province
+    ) {
+      return NextResponse.json(
+        {
+          error: "All fields are required.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    // Check OTP verified
+    const verifiedRecord = await Verification.findOne({
+      identifier: email,
+      verified: true,
+    });
+
+    if (!verifiedRecord) {
+      return NextResponse.json(
+        {
+          error: "Please verify your email first.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    // Better Auth instance
+    const auth = await getAuth();
+
+    // Create user using Better Auth
+    const result = await auth.api.signUpEmail({
+      body: {
+        email,
+        password,
+        name: `${firstName} ${lastName}`,
+      },
+    });
+
+    // Create employer profile
+    await Employer.create({
+      authUserId: result.user.id,
+      orgName,
+      province,
+    });
+
+    // Delete verification records
+    await Verification.deleteMany({
+      identifier: email,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Account created successfully.",
+      user: result.user,
+    });
+  } catch (error: any) {
+    console.error("REGISTER ERROR:", error);
+
+    return NextResponse.json(
+      {
+        error:
+          error?.message ||
+          "Failed to create account.",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
