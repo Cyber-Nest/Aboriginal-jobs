@@ -969,7 +969,7 @@ function PostAJobContent() {
                   )}
 
                   {/* Employer Contact Name */}
-                  <div className="flex flex-col gap-2">
+                  {/* <div className="flex flex-col gap-2">
                     <Label className="text-[#6B3A2A] font-medium text-sm">
                       Employer Contact Name{" "}
                       <span className="text-[#C8782A]">*</span>
@@ -1008,7 +1008,7 @@ function PostAJobContent() {
                         <XCircle size={12} /> {errors.contactName}
                       </p>
                     )}
-                  </div>
+                  </div> */}
 
                   {/* Job Title */}
                   <div className="flex flex-col gap-2">
@@ -1373,6 +1373,47 @@ function PostAJobContent() {
                     {errors.category && touched.category && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <XCircle size={12} /> {errors.category}
+                      </p>
+                    )}
+                  </div>
+                    {/* Employer Contact Name */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-[#6B3A2A] font-medium text-sm">
+                      Employer Contact Name{" "}
+                      <span className="text-[#C8782A]">*</span>
+                    </Label>
+                    <Input
+                      value={contactName}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setContactName(value);
+                        if (value.trim()) {
+                          if (!validateName(value)) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              contactName:
+                                "Contact name should only contain letters, spaces, hyphens, and apostrophes (no numbers)",
+                            }));
+                          } else if (value.trim().length < 2) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              contactName:
+                                "Contact name must be at least 2 characters",
+                            }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, contactName: "" }));
+                          }
+                        } else {
+                          setErrors((prev) => ({ ...prev, contactName: "" }));
+                        }
+                      }}
+                      onBlur={() => markTouched("contactName")}
+                      placeholder="e.g. Sarah Johnson"
+                      className="placeholder:text-[#1C1C1C]/30"
+                    />
+                    {errors.contactName && touched.contactName && (
+                      <p className="text-xs text-red-500 flex items-center gap-1">
+                        <XCircle size={12} /> {errors.contactName}
                       </p>
                     )}
                   </div>

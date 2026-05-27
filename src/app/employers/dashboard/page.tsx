@@ -72,6 +72,10 @@ interface ApplyMethod {
 }
 
 interface Job {
+  experience: string;
+  startDate(startDate: any): import("react").ReactNode;
+  website: any;
+  runDays: any;
   _id: string;
   title: string;
   company: string;
@@ -209,17 +213,7 @@ function ViewJobModal({
   onClose: () => void;
 }) {
   if (!job) return null;
- // Background Scroll Prevention
-  // useEffect(() => {
-  //   if (open) {
-  //     document.body.style.overflow = "hidden";
-  //   } else {
-  //     document.body.style.overflow = "unset";
-  //   }
-  //   return () => {
-  //     document.body.style.overflow = "unset";
-  //   };
-  // }, [open]);
+
   const getApplyMethodDisplay = (method: ApplyMethod) => {
     switch (method.method) {
       case "email":
@@ -241,6 +235,19 @@ function ViewJobModal({
       default:
         return null;
     }
+  };
+
+  // Helper to display start date nicely
+  const getStartDateDisplay = (startDate: string) => {
+    if (!startDate) return "Not specified";
+    const map: Record<string, string> = {
+      asap: "As Soon As Possible",
+      immediate: "Immediate Joining",
+      "1week": "Within 1 Week",
+      "2weeks": "Within 2 Weeks",
+      "1month": "Within 1 Month",
+    };
+    return map[startDate] || startDate;
   };
 
   return (
@@ -342,6 +349,33 @@ function ViewJobModal({
                 {job.category}
               </p>
             </div>
+            {/* Experience  */}
+            <div>
+              <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
+                Experience Required
+              </p>
+              <p className="text-sm font-semibold text-neutral-800 mt-1">
+                {job.experience || "Not specified"}
+              </p>
+            </div>
+            {/*  Expected Start Date */}
+            <div>
+              <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
+                Expected Start Date
+              </p>
+              <p className="text-sm font-semibold text-neutral-800 mt-1">
+                {getStartDateDisplay(job.startDate as any)}
+              </p>
+            </div>
+            {/* NEW: Run Days */}
+            <div>
+              <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
+                Run Duration
+              </p>
+              <p className="text-sm font-semibold text-neutral-800 mt-1">
+                {job.runDays ? `${job.runDays} Days` : "30 Days (default)"}
+              </p>
+            </div>
             <div>
               <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
                 Posted Date
@@ -359,6 +393,27 @@ function ViewJobModal({
               </p>
             </div>
           </div>
+
+          {/* Website Section  */}
+          {job.website && (
+            <div className="bg-[#FAF5EE]/30 border border-[#C8782A]/10 rounded-xl p-4">
+              <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60 mb-1">
+                Company Website
+              </p>
+              <a
+                href={
+                  job.website.startsWith("http")
+                    ? job.website
+                    : `https://${job.website}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-semibold text-[#C8782A] hover:underline break-all"
+              >
+                {job.website}
+              </a>
+            </div>
+          )}
 
           {/* About the Role */}
           {job.descriptionHtml && (
@@ -617,7 +672,7 @@ function JobCard({
 
       <CardFooter className="p-5 pt-0 flex gap-2 border-t border-neutral-50/50 bg-neutral-50/20">
         {/* Responsive Download Button - Icon only on mobile, Icon + Text on laptop */}
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           onClick={() => onDownload(job._id, job.title)}
@@ -632,7 +687,7 @@ function JobCard({
               <span className="hidden sm:inline">Download</span>
             </>
           )}
-        </Button>
+        </Button> */}
         <Button
           variant="outline"
           size="sm"
@@ -769,26 +824,29 @@ function DashboardSkeleton() {
           <div className="h-11 w-36 bg-[#C8782A]/20 rounded-xl" />
         </div>
       </div>
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 mb-8">
-          {[1,2,3].map(i => (
-             <div key={i} className="bg-white p-5 rounded-2xl border border-[#C8782A]/10 h-[100px]">
-               <div className="h-4 w-24 bg-neutral-200 rounded mb-3" />
-               <div className="h-8 w-16 bg-neutral-200 rounded" />
-             </div>
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white p-5 rounded-2xl border border-[#C8782A]/10 h-[100px]"
+            >
+              <div className="h-4 w-24 bg-neutral-200 rounded mb-3" />
+              <div className="h-8 w-16 bg-neutral-200 rounded" />
+            </div>
           ))}
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="h-11 flex-1 bg-neutral-100 rounded-xl" />
           <div className="h-11 w-full sm:w-[140px] bg-neutral-100 rounded-xl" />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-           {[1,2,3,4].map(i => (
-             <JobSkeletonCard key={i} />
-           ))}
+          {[1, 2, 3, 4].map((i) => (
+            <JobSkeletonCard key={i} />
+          ))}
         </div>
       </div>
     </div>
@@ -1064,7 +1122,6 @@ export default function EmployerDashboard() {
               <option value="closed">Closed Only</option>
               <option value="expired">Expired Only</option>
             </select>
-           
           </div>
         </div>
 
