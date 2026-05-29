@@ -6,6 +6,11 @@ const EmployerSchema = new Schema(
       type: String,
       required: true,
     },
+    currentPackageId: {
+      type: Schema.Types.ObjectId,
+      ref: "EmployerPackage",
+      default: null,
+    },
 
     orgName: {
       type: String,
@@ -23,9 +28,8 @@ const EmployerSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
-
 
 EmployerSchema.index({
   orgName: 1,

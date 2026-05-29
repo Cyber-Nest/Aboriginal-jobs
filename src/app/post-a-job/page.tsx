@@ -167,7 +167,7 @@ function PostJobSkeleton() {
             <div className="h-3 w-3 bg-[#C8782A]/10 rounded-full" />
             <div className="h-4 w-24 bg-[#C8782A]/20 rounded" />
           </div>
-          
+
           <div className="h-4 w-28 bg-[#C8782A]/15 rounded mb-3" />
           <div className="h-10 w-64 bg-[#C8782A]/15 rounded mb-8 sm:mb-10" />
 
@@ -189,10 +189,10 @@ function PostJobSkeleton() {
                       <div className="h-11 w-full bg-neutral-100 rounded-xl" />
                     </div>
                     {section === 2 && (
-                       <div className="space-y-2 md:col-span-2 mt-4">
-                         <div className="h-4 w-32 bg-neutral-200 rounded" />
-                         <div className="h-32 w-full bg-neutral-100 rounded-xl" />
-                       </div>
+                      <div className="space-y-2 md:col-span-2 mt-4">
+                        <div className="h-4 w-32 bg-neutral-200 rounded" />
+                        <div className="h-32 w-full bg-neutral-100 rounded-xl" />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -205,12 +205,12 @@ function PostJobSkeleton() {
 
             <div className="xl:w-[380px] flex-shrink-0 space-y-5 hidden xl:block">
               <div className="bg-white rounded-2xl p-6 border border-[#C8782A]/10 h-[400px]">
-                 <div className="h-6 w-32 bg-neutral-200 rounded mb-6" />
-                 <div className="space-y-4">
-                   <div className="h-4 w-full bg-neutral-100 rounded" />
-                   <div className="h-4 w-5/6 bg-neutral-100 rounded" />
-                   <div className="h-4 w-4/6 bg-neutral-100 rounded" />
-                 </div>
+                <div className="h-6 w-32 bg-neutral-200 rounded mb-6" />
+                <div className="space-y-4">
+                  <div className="h-4 w-full bg-neutral-100 rounded" />
+                  <div className="h-4 w-5/6 bg-neutral-100 rounded" />
+                  <div className="h-4 w-4/6 bg-neutral-100 rounded" />
+                </div>
               </div>
             </div>
           </div>
@@ -441,6 +441,7 @@ function PostAJobContent() {
   const [salaryType, setSalaryType] = useState("hour");
   const [nocCode, setNocCode] = useState("");
   const [runDays, setRunDays] = useState("30");
+  const [vacancies, setVacancies] = useState<number | "">("");
   const [experience, setExperience] = useState("");
   const [startDate, setStartDate] = useState("");
   const [website, setWebsite] = useState("");
@@ -478,6 +479,7 @@ function PostAJobContent() {
             setSalaryType(job.salaryType || "hour");
             setNocCode(job.nocCode || "");
             setRunDays(job.runDays || "30");
+            setVacancies(job.vacancies || "");
             setExperience(job.experience || "");
             setStartDate(job.startDate || "");
             setWebsite(job.website || "");
@@ -608,6 +610,10 @@ function PostAJobContent() {
     } else if (!validateName(contactName)) {
       newErrors.contactName =
         "Contact name should only contain letters, spaces, hyphens, and apostrophes (no numbers)";
+    }
+
+    if (!vacancies || vacancies < 1) {
+      newErrors.vacancies = "Vacancies must be at least 1";
     }
 
     // City validation
@@ -752,6 +758,7 @@ function PostAJobContent() {
         category,
         nocCode: nocCode.trim(),
         runDays,
+        vacancies,
         experience: experience.trim(),
         startDate,
         descriptionHtml: descHtml,
@@ -824,6 +831,7 @@ function PostAJobContent() {
     featured: false,
     nocCode,
     runDays,
+    vacancies: vacancies === "" ? undefined : vacancies,
     experience,
     startDate,
     category,
@@ -880,6 +888,7 @@ function PostAJobContent() {
                 setNocCode("");
                 setDescHtml("");
                 setReqHtml("");
+                setVacancies("");
                 setApplyMethods([]);
                 setPostDate("");
               }}
@@ -967,48 +976,6 @@ function PostAJobContent() {
                       </p>
                     </div>
                   )}
-
-                  {/* Employer Contact Name */}
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-[#6B3A2A] font-medium text-sm">
-                      Employer Contact Name{" "}
-                      <span className="text-[#C8782A]">*</span>
-                    </Label>
-                    <Input
-                      value={contactName}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setContactName(value);
-                        if (value.trim()) {
-                          if (!validateName(value)) {
-                            setErrors((prev) => ({
-                              ...prev,
-                              contactName:
-                                "Contact name should only contain letters, spaces, hyphens, and apostrophes (no numbers)",
-                            }));
-                          } else if (value.trim().length < 2) {
-                            setErrors((prev) => ({
-                              ...prev,
-                              contactName:
-                                "Contact name must be at least 2 characters",
-                            }));
-                          } else {
-                            setErrors((prev) => ({ ...prev, contactName: "" }));
-                          }
-                        } else {
-                          setErrors((prev) => ({ ...prev, contactName: "" }));
-                        }
-                      }}
-                      onBlur={() => markTouched("contactName")}
-                      placeholder="e.g. Sarah Johnson"
-                      className="placeholder:text-[#1C1C1C]/30"
-                    />
-                    {errors.contactName && touched.contactName && (
-                      <p className="text-xs text-red-500 flex items-center gap-1">
-                        <XCircle size={12} /> {errors.contactName}
-                      </p>
-                    )}
-                  </div>
 
                   {/* Job Title */}
                   <div className="flex flex-col gap-2">
@@ -1350,6 +1317,30 @@ function PostAJobContent() {
                     </div>
                   </div>
 
+                  <div>
+                    <Label className="text-[#6B3A2A] font-medium text-sm">
+                      Vacancies Available{" "}
+                      <span className="text-[#C8782A]">*</span>
+                    </Label>
+
+                    <Input
+                      type="number"
+                      value={vacancies}
+                      onChange={(e) =>
+                        setVacancies(
+                          e.target.value === "" ? "" : Number(e.target.value),
+                        )
+                      }
+                      placeholder="e.g. 5"
+                      className="placeholder:text-[#1C1C1C]/30"
+                    />
+
+                    {errors.vacancies && (
+                      <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                        <XCircle size={12} /> {errors.vacancies}
+                      </p>
+                    )}
+                  </div>
                   {/* Category */}
                   <div>
                     <Label className="text-[#6B3A2A] font-medium text-sm">
@@ -1373,6 +1364,47 @@ function PostAJobContent() {
                     {errors.category && touched.category && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <XCircle size={12} /> {errors.category}
+                      </p>
+                    )}
+                  </div>
+                  {/* Employer Contact Name */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-[#6B3A2A] font-medium text-sm">
+                      Employer Contact Name{" "}
+                      <span className="text-[#C8782A]">*</span>
+                    </Label>
+                    <Input
+                      value={contactName}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setContactName(value);
+                        if (value.trim()) {
+                          if (!validateName(value)) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              contactName:
+                                "Contact name should only contain letters, spaces, hyphens, and apostrophes (no numbers)",
+                            }));
+                          } else if (value.trim().length < 2) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              contactName:
+                                "Contact name must be at least 2 characters",
+                            }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, contactName: "" }));
+                          }
+                        } else {
+                          setErrors((prev) => ({ ...prev, contactName: "" }));
+                        }
+                      }}
+                      onBlur={() => markTouched("contactName")}
+                      placeholder="e.g. Sarah Johnson"
+                      className="placeholder:text-[#1C1C1C]/30"
+                    />
+                    {errors.contactName && touched.contactName && (
+                      <p className="text-xs text-red-500 flex items-center gap-1">
+                        <XCircle size={12} /> {errors.contactName}
                       </p>
                     )}
                   </div>

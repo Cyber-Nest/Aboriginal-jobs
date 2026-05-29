@@ -21,6 +21,7 @@ import {
   Calendar,
   Code2,
   Hash,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,6 +112,7 @@ export interface Job {
   createdAt?: string | Date;
   expiresAt?: string | Date;
   indigenousPreference?: boolean;
+  vacancies?: number;
 }
 
 export interface JobFilters {
@@ -281,9 +283,14 @@ function JobCard({ job }: { job: Job }) {
           )}
         </div>
 
-        {/*  Experience and start date */}
-        {(job.experience || job.startDate) && (
+        {/*  Experience, start date, and vacancies */}
+        {(job.experience || job.startDate || job.vacancies) && (
           <div className="flex flex-wrap gap-2 mb-3">
+            {job.vacancies && (
+              <span className="inline-flex items-center gap-1 text-xs bg-[#FAF5EE] border border-[#C8782A]/10 text-[#6B3A2A]/70 px-2 py-0.5 rounded-full font-medium">
+                <Users size={10} className="text-[#C8782A]" /> {job.vacancies} {job.vacancies > 1 ? "Vacancies" : "Vacancy"}
+              </span>
+            )}
             {job.experience && (
               <span className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-600 px-2 py-0.5 rounded-full">
                 <Briefcase size={10} /> {job.experience}{" "}
@@ -464,6 +471,7 @@ export default function JobsPage() {
         expiresAt: job.expiresAt,
         indigenousPreference: job.indigenousPreference,
         postDate: job.postDate,
+        vacancies: job.vacancies,
       }),
     );
   }, [dbJobs]);

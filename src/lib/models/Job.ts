@@ -156,6 +156,23 @@ const JobSchema = new Schema(
       default: "hour",
     },
 
+    vacancies: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+
+    packageId: {
+      type: Schema.Types.ObjectId,
+      ref: "EmployerPackage",
+      default: null,
+    },
+
+    creditConsumed: {
+      type: Boolean,
+      default: false,
+    },
+
     employmentType: {
       type: String,
       enum: ["Full-time", "Part-time", "Contract", "Casual", "Volunteer"],

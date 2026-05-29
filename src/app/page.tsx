@@ -625,6 +625,7 @@ export default function HomePage() {
           </motion.section>
         )}
       </AnimatePresence>
+
       {/* ── DUAL CTA SPLIT ───────────────────────────────────────────────── */}
       <section className="bg-white py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1071,7 +1072,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 5. PACKAGES PREVIEW ─────────────────────────────────────────────── */}
-      <section className="bg-[#FAF5EE] py-16 lg:py-24">
+      {/* <section className="bg-[#FAF5EE] py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -1086,19 +1087,24 @@ export default function HomePage() {
             >
               Employer Packages
             </motion.p>
+
             <motion.h2
               variants={fadeUp}
               className="text-4xl lg:text-5xl font-bold text-[#1C1C1C]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              style={{
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               Packages for Every Hiring Need
             </motion.h2>
+
             <motion.p
               variants={fadeUp}
               className="text-[#6B3A2A]/70 mt-4 max-w-xl mx-auto"
             >
-              Whether you're posting your first job or building a long-term
-              Indigenous hiring strategy, we have a package for you.
+              Whether you're hiring for one position or building a long-term
+              Indigenous workforce strategy, we have the perfect package for
+              your organization.
             </motion.p>
           </motion.div>
 
@@ -1112,54 +1118,91 @@ export default function HomePage() {
             {[
               {
                 name: "Basic Job Posting",
-                tagline: "Get started with ease",
+
+                tagline: "Perfect for first-time hiring",
+
                 features: [
-                  "Single job listing",
-                  "30-day active posting",
-                  "Standard search visibility",
-                  "Applicant email notifications",
+                  "1 Job Posting Credit",
+
+                  "180 Days Job Visibility",
+
+                  "Standard Search Placement",
+
+                  "Email Applicant Notifications",
+
+                  "Employer Dashboard Access",
                 ],
-                cta: "Get Started",
+
+                cta: "View Package",
+
                 highlight: false,
               },
+
               {
                 name: "Featured Job Posting",
-                tagline: "Stand out from the crowd",
+
+                tagline: "Boost visibility & attract more applicants",
+
                 features: [
-                  "Highlighted placement",
-                  "60-day active posting",
-                  "Priority search results",
-                  "Featured badge on listing",
-                  "Applicant management tools",
+                  "3 Job Posting Credits",
+
+                  "Featured Job Badge",
+
+                  "Priority Search Placement",
+
+                  "Advanced Applicant Management",
+
+                  "180 Days Package Validity",
                 ],
-                cta: "Post Featured",
+
+                cta: "View Package",
+
                 highlight: true,
+
                 badge: "Most Popular",
               },
+
               {
-                name: "Employer Branding",
-                tagline: "Build your Indigenous employer brand",
+                name: "Employer Branding Package",
+
+                tagline: "Build trust with Indigenous communities",
+
                 features: [
-                  "Dedicated company profile page",
-                  "Multiple job listings",
-                  "Logo & banner placement",
-                  "Indigenous hiring statement",
-                  "Priority support",
+                  "10 Job Posting Credits",
+
+                  "Dedicated Employer Branding",
+
+                  "Company Logo & Banner Visibility",
+
+                  "Priority Employer Support",
+
+                  "Multiple Active Job Listings",
                 ],
-                cta: "Build Your Brand",
+
+                cta: "View Package",
+
                 highlight: false,
               },
+
               {
                 name: "Monthly Hiring Support",
-                tagline: "Full-service hiring partnership",
+
+                tagline: "Unlimited hiring with dedicated support",
+
                 features: [
-                  "Unlimited job postings",
-                  "Dedicated account support",
-                  "Full applicant management",
-                  "Monthly performance reports",
-                  "Indigenous hiring consultation",
+                  "Unlimited Job Postings",
+
+                  "365 Days Active Access",
+
+                  "Dedicated Hiring Assistance",
+
+                  "Monthly Hiring Reports",
+
+                  "Premium Employer Support",
                 ],
-                cta: "Contact Us",
+
+                cta: "View Package",
+
                 highlight: false,
               },
             ].map((pkg) => (
@@ -1168,6 +1211,7 @@ export default function HomePage() {
                 variants={fadeUp}
                 whileHover={{
                   y: -5,
+
                   boxShadow: pkg.highlight
                     ? "0 20px 50px rgba(200,120,42,0.3)"
                     : "0 12px 30px rgba(107,58,42,0.12)",
@@ -1185,39 +1229,57 @@ export default function HomePage() {
                     </span>
                   </div>
                 )}
+
                 <div
-                  className={`w-10 h-10 rounded-xl mb-5 flex items-center justify-center ${pkg.highlight ? "bg-white/20" : "bg-[#C8782A]/10"}`}
+                  className={`w-10 h-10 rounded-xl mb-5 flex items-center justify-center ${
+                    pkg.highlight ? "bg-white/20" : "bg-[#C8782A]/10"
+                  }`}
                 >
                   <Star
                     size={18}
                     className={pkg.highlight ? "text-white" : "text-[#C8782A]"}
                   />
                 </div>
+
                 <h3
-                  className={`font-bold text-lg mb-1 ${pkg.highlight ? "text-white" : "text-[#1C1C1C]"}`}
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className={`font-bold text-lg mb-1 ${
+                    pkg.highlight ? "text-white" : "text-[#1C1C1C]"
+                  }`}
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                  }}
                 >
                   {pkg.name}
                 </h3>
+
                 <p
-                  className={`text-sm mb-5 ${pkg.highlight ? "text-white/75" : "text-[#6B3A2A]/60"}`}
+                  className={`text-sm mb-5 ${
+                    pkg.highlight ? "text-white/75" : "text-[#6B3A2A]/60"
+                  }`}
                 >
                   {pkg.tagline}
                 </p>
+
                 <ul className="flex flex-col gap-2.5 mb-7 flex-1">
                   {pkg.features.map((f) => (
                     <li
                       key={f}
-                      className={`flex items-start gap-2.5 text-sm ${pkg.highlight ? "text-white/90" : "text-[#1C1C1C]/70"}`}
+                      className={`flex items-start gap-2.5 text-sm ${
+                        pkg.highlight ? "text-white/90" : "text-[#1C1C1C]/70"
+                      }`}
                     >
                       <CheckCircle
                         size={14}
-                        className={`flex-shrink-0 mt-0.5 ${pkg.highlight ? "text-white" : "text-[#7A9E7E]"}`}
+                        className={`flex-shrink-0 mt-0.5 ${
+                          pkg.highlight ? "text-white" : "text-[#7A9E7E]"
+                        }`}
                       />
+
                       {f}
                     </li>
                   ))}
                 </ul>
+
                 <Link href="/pricing" className="mt-auto">
                   <Button
                     className={`w-full font-semibold transition-all duration-200 ${
@@ -1235,9 +1297,15 @@ export default function HomePage() {
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.4,
+            }}
             className="text-center mt-10"
           >
             <Link href="/pricing">
@@ -1248,6 +1316,228 @@ export default function HomePage() {
               >
                 View All Packages
                 <ArrowRight size={16} className="ml-2" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section> */}
+
+      {/* ── 5. PACKAGES PREVIEW ─────────────────────────────────────────────── */}
+      <section className="bg-[#FAF5EE] py-16 lg:py-24 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-16"
+          >
+            <motion.p
+              variants={fadeUp}
+              className="text-[#C8782A] font-bold text-xs uppercase tracking-widest mb-3"
+            >
+              Employer Packages
+            </motion.p>
+
+            <motion.h2
+              variants={fadeUp}
+              className="text-4xl lg:text-5xl font-bold text-[#1C1C1C]"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+              }}
+            >
+              Packages for Every Hiring Need
+            </motion.h2>
+
+            <motion.p
+              variants={fadeUp}
+              className="text-[#6B3A2A]/70 mt-4 max-w-xl mx-auto text-base sm:text-lg leading-relaxed"
+            >
+              Whether you're hiring for one position or building a long-term
+              Indigenous workforce strategy, we have the perfect package for
+              your organization.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 items-stretch"
+          >
+            {[
+              {
+                name: "Starter",
+                tagline: "Perfect for first-time hiring",
+                features: [
+                  "Job Post Expiry - 180 Days",
+                  "Credit Never Expire",
+                  "1 Job Posting",
+                ],
+                cta: "View Package",
+                highlight: false,
+              },
+              {
+                name: "Deluxe",
+                tagline: "Boost visibility & attract more applicants",
+                features: [
+                  "Job Post Expiry - 180 Days",
+                  "Credit Never Expire",
+                  "5 Job Posting",
+                ],
+                cta: "View Package",
+                highlight: true,
+                badge: "Most Popular",
+              },
+              {
+                name: "Ultimate",
+                tagline: "Build trust with Indigenous communities",
+                features: [
+                  "Job Post Expiry - 180 Days",
+                  "Credit Never Expire",
+                  "10 Job Posting",
+                ],
+                cta: "View Package",
+                highlight: false,
+              },
+              {
+                name: "Unlimited",
+                tagline: "Unlimited hiring with dedicated support",
+                features: [
+                  "Job Post Expiry - 365 Days",
+                  "Unlimited Job Posting",
+                  "Priority Employer Support",
+                ],
+                cta: "View Package",
+                highlight: false,
+              },
+            ].map((pkg) => (
+              <motion.div
+                key={pkg.name}
+                variants={fadeUp}
+                whileHover={{
+                  y: -6,
+                  boxShadow: pkg.highlight
+                    ? "0 20px 40px rgba(200,120,42,0.25)"
+                    : "0 12px 24px rgba(107,58,42,0.08)",
+                }}
+                className={`rounded-2xl p-6 sm:p-7 relative transition-all duration-200 flex flex-col h-full ${
+                  pkg.highlight
+                    ? "bg-[#C8782A] text-white ring-2 ring-[#C8782A] shadow-xl lg:-mt-2 lg:mb-2"
+                    : "bg-white border border-[#C8782A]/10 hover:shadow-md"
+                }`}
+              >
+                {pkg.badge && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                    <span className="bg-[#6B3A2A] text-white text-[11px] font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap uppercase tracking-wider">
+                      {pkg.badge}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex-grow">
+                  <div
+                    className={`w-10 h-10 rounded-xl mb-5 flex items-center justify-center ${
+                      pkg.highlight ? "bg-white/20" : "bg-[#C8782A]/10"
+                    }`}
+                  >
+                    <Star
+                      size={18}
+                      className={
+                        pkg.highlight ? "text-white" : "text-[#C8782A]"
+                      }
+                    />
+                  </div>
+
+                  <h3
+                    className={`font-bold text-lg mb-1 leading-snug ${
+                      pkg.highlight ? "text-white" : "text-[#1C1C1C]"
+                    }`}
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                    }}
+                  >
+                    {pkg.name}
+                  </h3>
+
+                  <p
+                    className={`text-xs mb-5 font-medium ${
+                      pkg.highlight ? "text-white/75" : "text-[#6B3A2A]/60"
+                    }`}
+                  >
+                    {pkg.tagline}
+                  </p>
+
+                  <ul className="flex flex-col gap-3 mb-8">
+                    {pkg.features.map((f) => (
+                      <li
+                        key={f}
+                        className={`flex items-start gap-2.5 text-sm leading-snug ${
+                          pkg.highlight ? "text-white/90" : "text-[#1C1C1C]/70"
+                        }`}
+                      >
+                        <CheckCircle
+                          size={15}
+                          className={`flex-shrink-0 mt-0.5 ${
+                            pkg.highlight ? "text-white" : "text-[#7A9E7E]"
+                          }`}
+                        />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <Link href="/pricing" className="mt-auto pt-2 block w-full">
+                  <Button
+                    className={`w-full font-semibold rounded-xl py-5 ${
+                      pkg.highlight
+                        ? "bg-white text-[#C8782A] hover:bg-[#FAF5EE]"
+                        : "bg-[#C8782A] hover:bg-[#B06820] text-white"
+                    }`}
+                  >
+                    {pkg.cta}
+                  </Button>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
+            viewport={{ once: true }}
+            transition={{
+              duration: 0.5,
+              delay: 0.3,
+            }}
+            className="text-center mt-14"
+          >
+            <Link href="/pricing">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-[#C8782A] text-[#C8782A] hover:bg-[#C8782A] hover:text-white font-semibold px-10 rounded-xl transition-all duration-200 gap-2"
+              >
+                View All Packages
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                  />
+                </svg>
               </Button>
             </Link>
           </motion.div>

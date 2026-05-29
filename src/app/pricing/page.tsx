@@ -1,22 +1,77 @@
 "use client";
 
-import Link from 'next/link';
-import { motion } from 'motion/react';
-import { CheckCircle, ArrowRight, Star, Zap, Building2, HeartHandshake } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  CheckCircle,
+  Star,
+  Zap,
+  Building2,
+  HeartHandshake,
+  Crown,
+  X,
+} from "lucide-react";
+import toast from "react-hot-toast";
+
+import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth/auth-client";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut" as const,
+    },
+  },
 };
-const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
+
+const stagger = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 function OrganicShape({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
-      <circle cx="200" cy="200" r="180" stroke="currentColor" strokeWidth="1" opacity="0.15" />
-      <circle cx="200" cy="200" r="130" stroke="currentColor" strokeWidth="1" opacity="0.12" />
-      <circle cx="200" cy="200" r="80" stroke="currentColor" strokeWidth="1.5" opacity="0.1" />
+    <svg
+      viewBox="0 0 400 400"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle
+        cx="200"
+        cy="200"
+        r="180"
+        stroke="currentColor"
+        strokeWidth="1"
+        opacity="0.15"
+      />
+      <circle
+        cx="200"
+        cy="200"
+        r="130"
+        stroke="currentColor"
+        strokeWidth="1"
+        opacity="0.12"
+      />
+      <circle
+        cx="200"
+        cy="200"
+        r="80"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        opacity="0.1"
+      />
       <circle cx="200" cy="200" r="30" fill="currentColor" opacity="0.08" />
     </svg>
   );
@@ -25,175 +80,583 @@ function OrganicShape({ className }: { className?: string }) {
 const packages = [
   {
     icon: Star,
-    name: 'Basic Job Posting',
-    price: 'Contact for Pricing',
-    tagline: 'Perfect for getting started',
+    name: "Starter",
+    originalPrice: 25,
+    discountedPrice: 12.5,
+    tagline: "FEATURES OF STARTER PLAN",
     features: [
-      'Single job listing',
-      '30-day active posting',
-      'Standard search visibility',
-      'Applicant email notifications',
-      'Basic applicant tracking',
+      "Job Post Expiry - 180 Days",
+      "Credit Never Expire",
+      "1 Job Posting",
     ],
-    cta: 'Get Started',
+    cta: "Select Package",
     highlight: false,
-    badge: null,
+    badge: "50% OFF",
   },
   {
     icon: Zap,
-    name: 'Featured Job Posting',
-    price: 'Contact for Pricing',
-    tagline: 'Maximum visibility for your listing',
+    name: "Deluxe",
+    originalPrice: 95,
+    discountedPrice: 47.5,
+    tagline: "FEATURES OF DELUXE PLAN",
     features: [
-      'Highlighted listing placement',
-      '60-day active posting',
-      'Priority search results',
-      'Featured badge on listing',
-      'Applicant management tools',
-      'Email & dashboard notifications',
+      "Job Post Expiry - 180 Days",
+      "Credit Never Expire",
+      "5 Job Posting",
     ],
-    cta: 'Post Featured',
+    cta: "Select Package",
     highlight: true,
-    badge: 'Most Popular',
+    badge: "Most Popular • 50% OFF",
   },
   {
     icon: Building2,
-    name: 'Employer Branding Package',
-    price: 'Contact for Pricing',
-    tagline: 'Build your Indigenous employer brand',
+    name: "Ultimate",
+    originalPrice: 195,
+    discountedPrice: 97.5,
+    tagline: "FEATURES OF ULTIMATE PLAN",
     features: [
-      'Dedicated company profile page',
-      'Multiple job listings included',
-      'Logo & banner placement',
-      'Indigenous hiring statement',
-      'Priority customer support',
-      'Enhanced search visibility',
+      "Job Post Expiry - 180 Days",
+      "Credit Never Expire",
+      "10 Job Posting",
     ],
-    cta: 'Build Your Brand',
+    cta: "Select Package",
     highlight: false,
-    badge: null,
+    badge: "50% OFF",
   },
   {
     icon: HeartHandshake,
-    name: 'Monthly Hiring Support',
-    price: 'Contact for Pricing',
-    tagline: 'Full-service hiring partnership',
+    name: "Pro Plan",
+    originalPrice: 380,
+    discountedPrice: 190,
+    tagline: "FEATURES OF PRO PLAN",
     features: [
-      'Unlimited job postings',
-      'Dedicated account manager',
-      'Full applicant management suite',
-      'Monthly performance reports',
-      'Indigenous hiring consultation',
-      'Priority featured placement',
-      'Custom employer profile',
+      "Job Post Expiry - 180 Days",
+      "Credit Never Expire",
+      "20 Job Posting",
     ],
-    cta: 'Contact Us',
+    cta: "Select Package",
     highlight: false,
-    badge: 'Best Value',
+    badge: "Best Value • 50% OFF",
+  },
+  {
+    icon: Crown,
+    name: "Unlimited",
+    originalPrice: 1350,
+    discountedPrice: 675,
+    tagline: "FEATURES OF UNLIMITED PLAN",
+    features: [
+      "Job Post Expiry - 365 Days",
+      "Unlimited Job Posting",
+      "Priority Employer Support",
+    ],
+    cta: "Select Package",
+    highlight: false,
+    badge: "Mega Deal • 50% OFF",
   },
 ];
 
 const faqs = [
-  { q: 'How long are job postings active?', a: 'Basic postings are active for 30 days, Featured postings for 60 days. Monthly Hiring Support includes unlimited postings with flexible durations.' },
-  { q: 'Can I edit my job posting after it\'s live?', a: 'Yes, you can edit your job posting at any time through your employer dashboard.' },
-  { q: 'How do I receive applications?', a: 'Applications are delivered to your employer dashboard and via email notifications. You can manage all applicants in one place.' },
-  { q: 'Is Aboriginal Jobs Canada only for Indigenous-owned businesses?', a: 'No — Aboriginal Jobs Canada welcomes all employers who are committed to inclusive hiring and connecting with Indigenous talent across Canada.' },
-  { q: 'Do you offer support for writing inclusive job postings?', a: 'Yes, our team can provide guidance on writing respectful, inclusive job descriptions that resonate with Indigenous job seekers.' },
+  {
+    q: "How long are job postings active?",
+    a: "Postings are active for 180 days across most standard plans.",
+  },
+  {
+    q: "Can I edit my job posting after it's live?",
+    a: "Yes, you can edit your job posting anytime through your employer dashboard.",
+  },
+  {
+    q: "Do credits expire?",
+    a: "Starter, Deluxe, Ultimate and Pro Plan credits never expire. Unlimited plan remains active for 1 year.",
+  },
+  {
+    q: "Can I purchase the same package again?",
+    a: "Yes. Credits are added to your existing account automatically.",
+  },
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
+  const { user, isAuthenticated, isPending } = useSession();
+
+  const [loadingPackage, setLoadingPackage] = useState<string | null>(null);
+  const [selectedPkg, setSelectedPkg] = useState<(typeof packages)[0] | null>(
+    null,
+  );
+
+  const [promoCode, setPromoCode] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoError, setPromoError] = useState("");
+
+  useEffect(() => {
+    if (!isPending && !isAuthenticated) {
+      // no-op; handled on click
+    }
+  }, [isPending, isAuthenticated]);
+
+  const finalPrice = useMemo(() => {
+    if (!selectedPkg) return null;
+    return promoApplied ? 0 : selectedPkg.discountedPrice;
+  }, [selectedPkg, promoApplied]);
+
+  const resetModalState = () => {
+    setPromoCode("");
+    setPromoLoading(false);
+    setPromoApplied(false);
+    setPromoError("");
+  };
+
+  const handleInitiatePurchase = (pkg: (typeof packages)[0]) => {
+    if (isPending) return;
+
+    if (!isAuthenticated) {
+      router.push("/login?from=/pricing");
+      return;
+    }
+
+    setSelectedPkg(pkg);
+    resetModalState();
+  };
+
+  const handleApplyPromo = async () => {
+    if (!selectedPkg || !promoCode.trim()) return;
+
+    try {
+      setPromoLoading(true);
+      setPromoError("");
+
+      const response = await fetch("/api/promo/check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          packageName: selectedPkg.name,
+          promoCode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Invalid promo code");
+      }
+
+      setPromoApplied(true);
+      toast.success("Promo code applied successfully.");
+    } catch (error: any) {
+      setPromoApplied(false);
+      setPromoError(error.message || "Something went wrong");
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!selectedPkg) return;
+
+    try {
+      setLoadingPackage(selectedPkg.name);
+
+      const endpoint = promoApplied
+        ? "/api/promo/verify"
+        : "/api/stripe/create-checkout-session";
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          packageName: selectedPkg.name,
+          promoCode: promoApplied ? promoCode : null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to process request");
+      }
+
+      // PROMO FLOW
+      if (promoApplied) {
+        toast.success(
+          data.message || `${selectedPkg.name} activated successfully`,
+        );
+
+        setSelectedPkg(null);
+
+        router.push("/employers/dashboard");
+
+        return;
+      }
+
+      // STRIPE FLOW
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+
+        return;
+      }
+
+      throw new Error("Checkout URL missing");
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setLoadingPackage(null);
+    }
+  };
+
+  if (isPending) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF5EE]">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#C8782A]/20 border-t-[#C8782A]" />
+      </div>
+    );
+  }
+
   return (
     <>
-      {/* Hero */}
       <section className="bg-[#FAF5EE] py-16 lg:py-24 relative overflow-hidden">
         <OrganicShape className="absolute -right-24 top-1/2 -translate-y-1/2 w-[400px] h-[400px] text-[#C8782A] pointer-events-none" />
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div variants={stagger} initial="hidden" animate="visible">
-            <motion.p variants={fadeUp} className="text-[#C8782A] font-semibold text-sm uppercase tracking-widest mb-3">Employer Packages</motion.p>
-            <motion.h1 variants={fadeUp} className="text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <div className="inline-flex items-center gap-2 bg-[#C8782A]/10 text-[#C8782A] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 animate-pulse">
+              🔥 Limited Time Offer: 50% OFF All Packages
+            </div>
+
+            <motion.h1
+              variants={fadeUp}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-5"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+              }}
+            >
               Packages for Every Hiring Need
             </motion.h1>
-            <motion.p variants={fadeUp} className="text-[#6B3A2A]/70 text-lg max-w-2xl mx-auto leading-relaxed">
-              Whether you're posting your first job or building a long-term Indigenous hiring strategy, we have a package designed for you. Contact us for current pricing.
+
+            <motion.p
+              variants={fadeUp}
+              className="text-[#6B3A2A]/70 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed"
+            >
+              Whether you&apos;re posting your first job or building a long-term
+              Indigenous hiring strategy, we have a package designed for you.
             </motion.p>
           </motion.div>
         </div>
       </section>
 
-      {/* Packages */}
-      <section className="bg-white py-8 lg:py-16 pb-20">
+      <section className="bg-white py-12 lg:py-20 pb-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 items-stretch pt-6"
+          >
             {packages.map((pkg) => (
               <motion.div
                 key={pkg.name}
                 variants={fadeUp}
-                whileHover={{ y: -5 }}
-                className={`rounded-2xl p-8 relative transition-shadow duration-200 ${
+                whileHover={{ y: -6 }}
+                className={`rounded-2xl p-6 sm:p-7 relative transition-all duration-200 flex flex-col h-full ${
                   pkg.highlight
-                    ? 'bg-[#C8782A] text-white ring-2 ring-[#C8782A] shadow-2xl lg:-mt-4 lg:mb-4'
-                    : 'bg-[#FAF5EE] border border-[#C8782A]/10 hover:shadow-lg'
+                    ? "bg-[#C8782A] text-white ring-2 ring-[#C8782A] shadow-xl xl:-mt-4 xl:mb-4"
+                    : "bg-[#FAF5EE] border border-[#C8782A]/10 hover:shadow-md"
                 }`}
               >
                 {pkg.badge && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className={`text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap ${pkg.highlight ? 'bg-[#6B3A2A] text-white' : 'bg-[#C8782A] text-white'}`}>
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                    <span
+                      className={`text-[11px] font-bold px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap tracking-wide uppercase ${
+                        pkg.highlight
+                          ? "bg-[#6B3A2A] text-white"
+                          : "bg-[#C8782A] text-white"
+                      }`}
+                    >
                       {pkg.badge}
                     </span>
                   </div>
                 )}
-                <div className={`w-11 h-11 rounded-xl mb-5 flex items-center justify-center ${pkg.highlight ? 'bg-white/20' : 'bg-[#C8782A]/10'}`}>
-                  <pkg.icon size={20} className={pkg.highlight ? 'text-white' : 'text-[#C8782A]'} />
+
+                <div className="flex-grow">
+                  <div
+                    className={`w-11 h-11 rounded-xl mb-5 flex items-center justify-center ${
+                      pkg.highlight ? "bg-white/20" : "bg-[#C8782A]/10"
+                    }`}
+                  >
+                    <pkg.icon
+                      size={20}
+                      className={
+                        pkg.highlight ? "text-white" : "text-[#C8782A]"
+                      }
+                    />
+                  </div>
+
+                  <h3
+                    className={`font-bold text-xl mb-1 ${
+                      pkg.highlight ? "text-white" : "text-[#1C1C1C]"
+                    }`}
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                    }}
+                  >
+                    {pkg.name}
+                  </h3>
+
+                  <p
+                    className={`text-xs font-medium uppercase tracking-wider mb-3 ${
+                      pkg.highlight ? "text-white/70" : "text-[#6B3A2A]/60"
+                    }`}
+                  >
+                    {pkg.tagline}
+                  </p>
+
+                  <div className="mb-6 border-b border-dashed border-current/20 pb-4">
+                    <div className="flex items-baseline gap-1.5">
+                      <span
+                        className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+                          pkg.highlight ? "text-white" : "text-[#1C1C1C]"
+                        }`}
+                      >
+                        ${pkg.discountedPrice}
+                      </span>
+
+                      <span
+                        className={`text-sm line-through ${
+                          pkg.highlight ? "text-white/50" : "text-[#6B3A2A]/50"
+                        }`}
+                      >
+                        ${pkg.originalPrice}
+                      </span>
+                    </div>
+
+                    <p
+                      className={`text-[10px] font-bold tracking-widest mt-1 uppercase ${
+                        pkg.highlight ? "text-white/60" : "text-[#6B3A2A]/60"
+                      }`}
+                    >
+                      CAD • One-Time
+                    </p>
+                  </div>
+
+                  <ul className="flex flex-col gap-3 mb-8">
+                    {pkg.features.map((f) => (
+                      <li
+                        key={f}
+                        className={`flex items-start gap-2.5 text-sm leading-snug ${
+                          pkg.highlight ? "text-white/90" : "text-[#1C1C1C]/70"
+                        }`}
+                      >
+                        <CheckCircle
+                          size={15}
+                          className={`flex-shrink-0 mt-0.5 ${
+                            pkg.highlight ? "text-white" : "text-[#7A9E7E]"
+                          }`}
+                        />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className={`font-bold text-xl mb-1 ${pkg.highlight ? 'text-white' : 'text-[#1C1C1C]'}`} style={{ fontFamily: "'Playfair Display', serif" }}>{pkg.name}</h3>
-                <p className={`text-sm mb-2 ${pkg.highlight ? 'text-white/70' : 'text-[#6B3A2A]/60'}`}>{pkg.tagline}</p>
-                <p className={`text-sm font-semibold mb-6 ${pkg.highlight ? 'text-white/90' : 'text-[#C8782A]'}`}>{pkg.price}</p>
-                <ul className="flex flex-col gap-2.5 mb-8">
-                  {pkg.features.map((f) => (
-                    <li key={f} className={`flex items-start gap-2.5 text-sm ${pkg.highlight ? 'text-white/90' : 'text-[#1C1C1C]/70'}`}>
-                      <CheckCircle size={14} className={`flex-shrink-0 mt-0.5 ${pkg.highlight ? 'text-white' : 'text-[#7A9E7E]'}`} />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/contact">
-                  <Button className={`w-full font-semibold ${pkg.highlight ? 'bg-white text-[#C8782A] hover:bg-[#FAF5EE]' : 'bg-[#C8782A] hover:bg-[#B06820] text-white'}`}>
+
+                <div className="mt-auto pt-2">
+                  <Button
+                    onClick={() => handleInitiatePurchase(pkg)}
+                    className={`w-full font-semibold transition-colors rounded-xl py-5 ${
+                      pkg.highlight
+                        ? "bg-white text-[#C8782A] hover:bg-[#FAF5EE]"
+                        : "bg-[#C8782A] hover:bg-[#B06820] text-white"
+                    }`}
+                  >
                     {pkg.cta}
                   </Button>
-                </Link>
+                </div>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* FAQ */}
+      <AnimatePresence>
+        {selectedPkg && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                if (loadingPackage !== selectedPkg.name) setSelectedPkg(null);
+              }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white p-6 shadow-2xl border border-[#C8782A]/10"
+            >
+              <button
+                disabled={loadingPackage === selectedPkg.name}
+                onClick={() => setSelectedPkg(null)}
+                className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors rounded-full p-1 hover:bg-slate-50"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-[#C8782A]/10 text-[#C8782A] rounded-xl">
+                  <selectedPkg.icon size={20} />
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-bold tracking-widest text-[#C8782A] uppercase">
+                    Checkout
+                  </span>
+
+                  <h3 className="text-xl font-bold text-[#1C1C1C] leading-none mt-0.5">
+                    {selectedPkg.name}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="bg-[#FAF5EE] rounded-xl p-4 mb-5 border border-[#C8782A]/10 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-[#1C1C1C]">
+                    Total Amount Due
+                  </p>
+                  <p className="text-[11px] text-[#6B3A2A]/60 mt-0.5">
+                    {promoApplied
+                      ? "Promo applied successfully"
+                      : "Includes 50% discount"}
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-2xl font-black text-[#1C1C1C]">
+                    ${finalPrice ?? selectedPkg.discountedPrice}
+                  </span>
+                  <span className="text-xs text-[#6B3A2A]/60 block font-medium">
+                    CAD
+                  </span>
+                </div>
+              </div>
+
+              <div className="mb-5">
+                <label className="text-[11px] font-bold tracking-wider text-[#6B3A2A]/60 uppercase block mb-2">
+                  Promo Code
+                </label>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => {
+                      setPromoCode(e.target.value.toUpperCase());
+                      if (promoApplied) {
+                        setPromoApplied(false);
+                      }
+                      if (promoError) {
+                        setPromoError("");
+                      }
+                    }}
+                    placeholder="Enter promo code"
+                    className="flex-1 border border-[#C8782A]/20 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#C8782A]/30"
+                  />
+
+                  <Button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={promoLoading || !promoCode.trim()}
+                    className="bg-[#1C1C1C] hover:bg-[#2A2A2A] text-white px-5 rounded-xl"
+                  >
+                    {promoLoading ? "Checking..." : "Apply"}
+                  </Button>
+                </div>
+
+                {promoApplied && (
+                  <p className="text-emerald-600 text-xs font-semibold mt-2">
+                    Promo applied successfully 🎉
+                  </p>
+                )}
+
+                {promoError && (
+                  <p className="text-red-500 text-xs font-semibold mt-2">
+                    {promoError}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Button
+                  onClick={handleConfirmPurchase}
+                  disabled={loadingPackage === selectedPkg.name}
+                  className="w-full bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold py-5 rounded-xl"
+                >
+                  {loadingPackage === selectedPkg.name
+                    ? "Processing..."
+                    : finalPrice === 0
+                      ? "Activate Package"
+                      : `Confirm & Pay $${finalPrice}`}
+                </Button>
+
+                <button
+                  disabled={loadingPackage === selectedPkg.name}
+                  onClick={() => setSelectedPkg(null)}
+                  className="w-full text-[#6B3A2A]/60 hover:text-[#6B3A2A] font-medium text-xs py-2 transition-colors"
+                >
+                  Cancel Transaction
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <section className="bg-[#FAF5EE] py-16 lg:py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12">
-            <motion.h2 variants={fadeUp} className="text-4xl font-bold text-[#1C1C1C]" style={{ fontFamily: "'Playfair Display', serif" }}>Frequently Asked Questions</motion.h2>
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <motion.h2
+              variants={fadeUp}
+              className="text-4xl font-bold text-[#1C1C1C]"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+              }}
+            >
+              Frequently Asked Questions
+            </motion.h2>
           </motion.div>
-          <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="flex flex-col gap-4">
+
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="flex flex-col gap-4"
+          >
             {faqs.map((faq) => (
-              <motion.div key={faq.q} variants={fadeUp} className="bg-white rounded-2xl p-7 border border-[#C8782A]/10">
+              <motion.div
+                key={faq.q}
+                variants={fadeUp}
+                className="bg-white rounded-2xl p-7 border border-[#C8782A]/10"
+              >
                 <h3 className="font-bold text-[#1C1C1C] mb-2">{faq.q}</h3>
-                <p className="text-[#6B3A2A]/70 text-sm leading-relaxed">{faq.a}</p>
+                <p className="text-[#6B3A2A]/70 text-sm leading-relaxed">
+                  {faq.a}
+                </p>
               </motion.div>
             ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-[#6B3A2A] py-16 relative overflow-hidden">
-        <OrganicShape className="absolute -right-20 top-1/2 -translate-y-1/2 w-80 h-80 text-[#C8782A] pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto px-4 text-center">
-          <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-            <motion.h2 variants={fadeUp} className="text-4xl font-bold text-[#FAF5EE] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Not Sure Which Package Is Right for You?</motion.h2>
-            <motion.p variants={fadeUp} className="text-[#FAF5EE]/70 mb-8 text-lg">Our team is happy to help you find the best fit for your hiring needs. Reach out today.</motion.p>
-            <motion.div variants={fadeUp} className="flex flex-wrap gap-4 justify-center">
-              <Link href="/contact"><Button size="lg" className="bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold px-10">Contact Aboriginal Jobs Canada <ArrowRight size={16} className="ml-2" /></Button></Link>
-            </motion.div>
           </motion.div>
         </div>
       </section>
