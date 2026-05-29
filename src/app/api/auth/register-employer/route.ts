@@ -6,6 +6,7 @@ import { getAuth } from "@/lib/auth/auth";
 
 import { Verification } from "@/lib/models/Verification";
 import { Employer } from "@/lib/models/Employer";
+import { EmployerPackage } from "@/lib/models/EmployerPackage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -72,11 +73,24 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Create employer profile
-    await Employer.create({
+    const employer = await Employer.create({
       authUserId: result.user.id,
       orgName,
       province,
+    });
+
+    await EmployerPackage.create({
+      employerId: employer._id,
+      packageName: "Free Plan",
+      remainingCredits: 1,
+      totalCreditsPurchased: 1,
+      unlimitedJobs: false,
+      isFreePlan: true,
+      jobPostExpiryDays: 30,
+      status: "Active",
+      purchasedAt: new Date(),
+      expiresAt: null,
+      creditExpiresAt: null,
     });
 
     // Delete verification records
@@ -94,13 +108,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        error:
-          error?.message ||
-          "Failed to create account.",
+        error: error?.message || "Failed to create account.",
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

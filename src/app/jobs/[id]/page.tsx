@@ -31,6 +31,7 @@ import {
   Check,
   Hash,
   User,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -58,6 +59,7 @@ interface JobDetail {
   salary: string;
   salaryType?: "hour" | "week" | "month" | "year";
   employmentType: string;
+  vacancies?: number;
   category: string;
   nocCode: string;
   runDays?: string;
@@ -351,6 +353,21 @@ function formatClosingDate(expiresAt?: string | Date): string {
   if (!expiresAt) return "Not specified";
   const date = new Date(expiresAt);
   return date.toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+function calculateClosingDate(
+  postDate?: string | Date,
+  runDays?: string,
+): string {
+  if (!postDate || !runDays) return "Not specified";
+
+  const closingDate = new Date(postDate);
+  closingDate.setDate(closingDate.getDate() + Number(runDays));
+
+  return closingDate.toLocaleDateString("en-CA", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -887,6 +904,12 @@ export default function JobDetailPage() {
                     <DollarSign size={12} className="text-[#C8782A]" />
                     {formatSalary(job.salary, job.salaryType)}
                   </span>
+                  {job.vacancies && (
+                    <span className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#6B3A2A]/70 bg-white border border-[#C8782A]/12 rounded-full px-3 sm:px-4 py-1 sm:py-1.5">
+                      <Users size={12} className="text-[#C8782A]" />
+                      {job.vacancies} Vacancies
+                    </span>
+                  )}
                   {job.experience && (
                     <span className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#6B3A2A]/70 bg-white border border-[#C8782A]/12 rounded-full px-3 sm:px-4 py-1 sm:py-1.5">
                       <Briefcase size={12} className="text-[#C8782A]" />
@@ -1109,7 +1132,7 @@ export default function JobDetailPage() {
                           : "Recently"}
                       </span>
                     </div>
-                    {job.expiresAt && (
+                    {job.postDate && job.runDays && (
                       <div className="flex items-center gap-2.5 text-[#6B3A2A]/65">
                         <Calendar
                           size={14}
@@ -1118,7 +1141,7 @@ export default function JobDetailPage() {
                         <span>
                           Closes{" "}
                           <strong className="text-[#1C1C1C]">
-                            {formatClosingDate(job.expiresAt)}
+                            {calculateClosingDate(job.postDate, job.runDays)}
                           </strong>
                         </span>
                       </div>

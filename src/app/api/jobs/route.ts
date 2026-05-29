@@ -4,6 +4,7 @@ import { Employer } from "@/lib/models/Employer";
 import { Job } from "@/lib/models/Job";
 import { getAuth } from "@/lib/auth/auth";
 import { generateJobId } from "@/lib/utils/generateJobId";
+import { EmployerPackage } from "@/lib/models/EmployerPackage";
 
 export async function GET(request: NextRequest) {
   try {
@@ -127,6 +128,7 @@ export async function POST(request: NextRequest) {
       applyMethods,
       postDate,
       contactName,
+      vacancies,
     } = body;
 
     // Validation - Required fields
@@ -276,6 +278,52 @@ export async function POST(request: NextRequest) {
         orgName: company.trim(),
       });
     }
+    // GET ACTIVE PACKAGE
+    const employerPackage = await EmployerPackage.findOne({
+      employerId: employerRecord._id,
+      status: "Active",
+    });
+
+    if (!employerPackage) {
+      return NextResponse.json(
+        {
+          error: "No active package found.",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
+    // CHECK PACKAGE EXPIRY
+    if (
+      employerPackage.expiresAt &&
+      new Date(employerPackage.expiresAt) < new Date()
+    ) {
+      return NextResponse.json(
+        {
+          error: "Your package has expired. Please upgrade your plan.",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
+    // CHECK CREDITS
+    if (
+      !employerPackage.unlimitedJobs &&
+      employerPackage.remainingCredits <= 0
+    ) {
+      return NextResponse.json(
+        {
+          error: "Your credits are exhausted. Please upgrade your plan.",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
 
     // Employment type mapping
     const typeMap: Record<string, string> = {
@@ -321,6 +369,7 @@ export async function POST(request: NextRequest) {
       location,
       salary: salary?.trim() || "",
       salaryType: salaryType || "hour",
+      vacancies: Number(vacancies) || 1,
       employmentType: mappedType,
       category: category.trim(),
       nocCode: nocCode.trim(),
@@ -336,6 +385,8 @@ export async function POST(request: NextRequest) {
       indigenousPreference: indigenousOwned ?? false,
       expiresAt,
       applyMethods: formattedApplyMethods,
+      packageId: employerPackage._id,
+      creditConsumed: true,
     };
 
     // Add contactEmail only if provided
@@ -352,6 +403,13 @@ export async function POST(request: NextRequest) {
     jobData.jobId = newJobId;
 
     const createdJob = await Job.create(jobData);
+
+    // DEDUCT CREDIT
+    if (!employerPackage.unlimitedJobs) {
+      employerPackage.remainingCredits -= 1;
+
+      await employerPackage.save();
+    }
 
     return NextResponse.json(
       {

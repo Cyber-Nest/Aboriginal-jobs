@@ -102,6 +102,7 @@ export async function PUT(
       postDate,
       status,
       contactName,
+      vacancies,
     } = body;
 
     // Validation - Required fields
@@ -280,6 +281,9 @@ export async function PUT(
     if (contactName !== undefined) updateData.contactName = contactName.trim();
     if (salary !== undefined) updateData.salary = salary?.trim() || "";
     if (salaryType !== undefined) updateData.salaryType = salaryType || "hour";
+    if (vacancies !== undefined) {
+      updateData.vacancies = Number(vacancies) || 1;
+    }
     if (employmentType !== undefined) {
       updateData.employmentType = typeMap[employmentType] || "Full-time";
     }

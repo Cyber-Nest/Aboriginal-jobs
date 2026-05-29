@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,7 +10,6 @@ import {
   Edit,
   Trash2,
   Eye,
-  MoreVertical,
   MapPin,
   Clock,
   DollarSign,
@@ -28,10 +27,12 @@ import {
   Mail,
   Phone,
   ChevronDown,
-  Fingerprint,
   Hash,
   UserIcon,
   Download,
+  Package,
+  Crown,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,12 +44,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Card,
   CardContent,
@@ -72,10 +67,6 @@ interface ApplyMethod {
 }
 
 interface Job {
-  experience: string;
-  startDate(startDate: any): import("react").ReactNode;
-  website: any;
-  runDays: any;
   _id: string;
   title: string;
   company: string;
@@ -96,12 +87,34 @@ interface Job {
   descriptionHtml?: string;
   requirementsHtml?: string;
   applyMethods?: ApplyMethod[];
+  experience?: string;
+  startDate?: string;
+  runDays?: string;
+  website?: string;
+  vacancies?: number;
+  packageId?: string | null;
+  creditConsumed?: boolean;
 }
 
 interface Stats {
   totalJobs: number;
   activeJobs: number;
   closedJobs: number;
+}
+
+interface EmployerPackageData {
+  id: string;
+  packageName: string;
+  remainingCredits: number;
+  totalCreditsPurchased: number;
+  unlimitedJobs: boolean;
+  isFreePlan: boolean;
+  jobPostExpiryDays: number;
+  status: string;
+  purchasedAt?: string | null;
+  expiresAt?: string | null;
+
+  paymentMethod?: string | null;
 }
 
 /* ── Helper Functions ───────────────────────────────────────────────── */
@@ -165,7 +178,7 @@ function StatCard({
   isLoading,
 }: {
   title: string;
-  value: number;
+  value: number | string;
   icon: React.ReactNode;
   isLoading?: boolean;
 }) {
@@ -198,6 +211,149 @@ function StatCard({
           {value}
         </div>
       </CardContent>
+    </Card>
+  );
+}
+
+/* ── Current Package Card ───────────────────────────────────────────── */
+function PackageCard({
+  pkg,
+  isLoading,
+  canPostJob,
+}: {
+  pkg: EmployerPackageData | null;
+  isLoading: boolean;
+  canPostJob: boolean;
+}) {
+  if (isLoading) {
+    return (
+      <Card className="rounded-2xl border border-[#C8782A]/10 bg-white shadow-sm overflow-hidden">
+        <CardHeader className="p-5 pb-3">
+          <div className="flex items-center gap-2 mb-3">
+            <Skeleton className="h-9 w-9 rounded-xl bg-neutral-200" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-4 w-28 bg-neutral-200" />
+              <Skeleton className="h-4 w-40 bg-neutral-200" />
+            </div>
+          </div>
+          <Skeleton className="h-8 w-36 bg-neutral-200" />
+        </CardHeader>
+        <CardContent className="px-5 pb-5 pt-0 space-y-3">
+          <Skeleton className="h-4 w-full bg-neutral-200" />
+          <Skeleton className="h-4 w-5/6 bg-neutral-200" />
+          <Skeleton className="h-4 w-4/6 bg-neutral-200" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const packageName = pkg?.packageName || "Free Plan";
+  const packageStatus = pkg?.status || "Active";
+  const remainingCredits = pkg?.remainingCredits ?? 0;
+  const totalCreditsPurchased = pkg?.totalCreditsPurchased ?? 0;
+  const unlimitedJobs = pkg?.unlimitedJobs ?? false;
+  const isFreePlan = pkg?.isFreePlan ?? true;
+  const jobPostExpiryDays = pkg?.jobPostExpiryDays ?? 30;
+
+  return (
+    <Card className="rounded-2xl border border-[#C8782A]/10 bg-gradient-to-br from-[#6B3A2A] via-[#8A4D2A] to-[#C8782A] text-white shadow-lg overflow-hidden">
+      <CardHeader className="p-5 pb-3">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2.5 bg-white/10 rounded-xl border border-white/10">
+            <Package size={17} className="text-white" />
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-white/70 font-bold">
+              Package Overview
+            </p>
+            <h3
+              className="text-xl font-bold leading-tight"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Current Package
+            </h3>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-2xl font-black tracking-tight">
+            {packageName}
+          </span>
+          {isFreePlan && (
+            <span className="text-[10px] uppercase tracking-wider bg-white/15 border border-white/10 px-2.5 py-0.5 rounded-md font-bold text-white/90">
+              Free Plan
+            </span>
+          )}
+          {unlimitedJobs && (
+            <span className="text-[10px] uppercase tracking-wider bg-amber-300 text-[#1C1C1C] px-2.5 py-0.5 rounded-md font-extrabold flex items-center gap-1">
+              <Crown size={10} className="fill-current" />
+              Unlimited
+            </span>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent className="px-5 pb-5 pt-0 space-y-2.5 text-sm text-white/90">
+        <div className="flex justify-between items-center py-1.5 border-b border-white/10">
+          <span className="text-white/60">Status</span>
+          <span className="font-semibold px-2 py-0.5 bg-white/15 rounded-full text-xs">
+            {packageStatus}
+          </span>
+        </div>
+
+        <div className="flex justify-between items-center py-1.5 border-b border-white/10">
+          <span className="text-white/60">Credits Left</span>
+          <span className="font-bold text-lg">
+            {unlimitedJobs ? "∞" : remainingCredits}
+          </span>
+        </div>
+
+        <div className="flex justify-between items-center py-1.5 border-b border-white/10">
+          <span className="text-white/60">Total Purchased</span>
+          <span className="font-semibold">{totalCreditsPurchased}</span>
+        </div>
+
+        <div className="flex justify-between items-center py-1.5 border-b border-white/10">
+          <span className="text-white/60">Job Post Expiry</span>
+          <span className="font-semibold">{jobPostExpiryDays} days</span>
+        </div>
+
+        {pkg?.purchasedAt && (
+          <div className="flex justify-between items-center py-1.5 border-b border-white/10">
+            <span className="text-white/60">Purchased On</span>
+            <span className="font-semibold">{formatDate(pkg.purchasedAt)}</span>
+          </div>
+        )}
+
+        {pkg?.expiresAt && (
+          <div className="flex justify-between items-center py-1.5">
+            <span className="text-white/60">Expiry Date</span>
+            <span className="font-semibold text-amber-200">
+              {formatDate(pkg.expiresAt)}
+            </span>
+          </div>
+        )}
+
+        {pkg?.paymentMethod && (
+          <div className="flex justify-between items-center py-1.5 border-t border-white/10">
+            <span className="text-white/60">Payment Method</span>
+
+            <span className="font-semibold capitalize">
+              {pkg.paymentMethod}
+            </span>
+          </div>
+        )}
+      </CardContent>
+
+      {!canPostJob && (
+        <CardFooter className="px-5 pb-5 pt-0">
+          <Link href="/pricing" className="w-full">
+            <Button className="w-full h-11 bg-white text-[#C8782A] hover:bg-[#FAF5EE] font-bold rounded-xl shadow-md shadow-black/5">
+              Upgrade Plan
+            </Button>
+          </Link>
+        </CardFooter>
+      )}
     </Card>
   );
 }
@@ -237,7 +393,6 @@ function ViewJobModal({
     }
   };
 
-  // Helper to display start date nicely
   const getStartDateDisplay = (startDate: string) => {
     if (!startDate) return "Not specified";
     const map: Record<string, string> = {
@@ -251,9 +406,8 @@ function ViewJobModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent className="max-w-2xl w-full max-h-[90vh] flex flex-col overflow-x-hidden rounded-2xl border border-neutral-100 shadow-2xl p-0 gap-0 bg-white">
-        {/* Header (Sticky Top) */}
         <div className="bg-gradient-to-br from-[#C8782A] via-[#BD6F23] to-[#A05D1A] px-6 py-6 text-white relative flex-shrink-0">
           <DialogHeader className="text-left">
             <DialogTitle
@@ -271,7 +425,6 @@ function ViewJobModal({
                 <MapPin size={14} className="text-white/80" />
                 {job.city}, {job.province}
               </span>
-              {/* Job ID and Contact Name */}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
                 {job.jobId && (
                   <span className="flex items-center gap-1.5 bg-white/10 px-2.5 py-0.5 rounded-md backdrop-blur-sm text-white/80 text-xs font-mono">
@@ -289,9 +442,7 @@ function ViewJobModal({
           </DialogHeader>
         </div>
 
-        {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-6 max-h-[calc(90vh-140px)]">
-          {/* Badges Row */}
           <div className="flex flex-wrap gap-2 pb-2 border-b border-neutral-100">
             {getStatusBadge(job.status)}
             {job.remote && (
@@ -312,7 +463,6 @@ function ViewJobModal({
             )}
           </div>
 
-          {/* Job Details Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-5 p-5 bg-[#FAF5EE]/40 border border-[#C8782A]/10 rounded-xl">
             <div>
               <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
@@ -320,6 +470,14 @@ function ViewJobModal({
               </p>
               <p className="text-sm font-semibold text-neutral-800 mt-1">
                 {job.employmentType}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
+                Vacancies
+              </p>
+              <p className="text-sm font-semibold text-neutral-800 mt-1">
+                {job.vacancies ?? "Not specified"}
               </p>
             </div>
             <div>
@@ -349,7 +507,6 @@ function ViewJobModal({
                 {job.category}
               </p>
             </div>
-            {/* Experience  */}
             <div>
               <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
                 Experience Required
@@ -358,7 +515,6 @@ function ViewJobModal({
                 {job.experience || "Not specified"}
               </p>
             </div>
-            {/*  Expected Start Date */}
             <div>
               <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
                 Expected Start Date
@@ -367,7 +523,6 @@ function ViewJobModal({
                 {getStartDateDisplay(job.startDate as any)}
               </p>
             </div>
-            {/* NEW: Run Days */}
             <div>
               <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60">
                 Run Duration
@@ -394,7 +549,6 @@ function ViewJobModal({
             </div>
           </div>
 
-          {/* Website Section  */}
           {job.website && (
             <div className="bg-[#FAF5EE]/30 border border-[#C8782A]/10 rounded-xl p-4">
               <p className="text-[11px] uppercase font-bold tracking-wider text-[#6B3A2A]/60 mb-1">
@@ -415,11 +569,10 @@ function ViewJobModal({
             </div>
           )}
 
-          {/* About the Role */}
           {job.descriptionHtml && (
             <div className="space-y-2">
               <h4 className="font-bold text-neutral-900 text-base flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#C8782A] rounded-full"></span>{" "}
+                <span className="w-1 h-4 bg-[#C8782A] rounded-full"></span>
                 About the Role
               </h4>
               <div
@@ -429,11 +582,10 @@ function ViewJobModal({
             </div>
           )}
 
-          {/* Qualifications */}
           {job.requirementsHtml && (
             <div className="pt-2 space-y-2">
               <h4 className="font-bold text-neutral-900 text-base flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#C8782A] rounded-full"></span>{" "}
+                <span className="w-1 h-4 bg-[#C8782A] rounded-full"></span>
                 Qualifications & Requirements
               </h4>
               <div
@@ -443,7 +595,6 @@ function ViewJobModal({
             </div>
           )}
 
-          {/* How to Apply Section */}
           {job.applyMethods && job.applyMethods.length > 0 && (
             <div className="border-t border-neutral-100 pt-5 space-y-3">
               <h4 className="font-bold text-neutral-900 text-base">
@@ -484,7 +635,6 @@ function ViewJobModal({
           )}
         </div>
 
-        {/* Sticky/Fixed Footer */}
         <DialogFooter className="flex flex-row items-center justify-end gap-3 px-6 py-4 bg-neutral-50 border-t border-neutral-100 rounded-b-2xl flex-shrink-0">
           <Button
             variant="outline"
@@ -549,25 +699,23 @@ function JobCard({
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            {/* Status Dropdown instead of static badge */}
-
             <div className="relative">
               <select
                 value={job.status}
                 onChange={(e) => handleStatusChange(e.target.value)}
                 disabled={isUpdatingStatus}
                 className={`
-      text-xs px-2.5 py-1 rounded-full font-semibold cursor-pointer appearance-none
-      ${
-        job.status === "active"
-          ? "bg-green-100 text-green-700 border border-green-200 hover:bg-green-200"
-          : job.status === "closed"
-            ? "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
-            : "bg-red-100 text-red-700 border border-red-200 hover:bg-red-200"
-      }
-      ${isUpdatingStatus ? "opacity-70 cursor-wait" : ""}
-      pr-6
-    `}
+                  text-xs px-2.5 py-1 rounded-full font-semibold cursor-pointer appearance-none
+                  ${
+                    job.status === "active"
+                      ? "bg-green-100 text-green-700 border border-green-200 hover:bg-green-200"
+                      : job.status === "closed"
+                        ? "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                        : "bg-red-100 text-red-700 border border-red-200 hover:bg-red-200"
+                  }
+                  ${isUpdatingStatus ? "opacity-70 cursor-wait" : ""}
+                  pr-6
+                `}
               >
                 <option value="active">
                   {isUpdatingStatus && job.status === "active"
@@ -586,7 +734,6 @@ function JobCard({
                 </option>
               </select>
 
-              {/* Always show chevron, but hide on loading */}
               {!isUpdatingStatus && (
                 <ChevronDown
                   size={12}
@@ -643,6 +790,14 @@ function JobCard({
         </div>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
+          {typeof job.vacancies === "number" && (
+            <Badge
+              variant="outline"
+              className="text-[10px] bg-[#FAF5EE]/70 text-[#6B3A2A] border-[#C8782A]/15 rounded-md font-medium px-2 py-0"
+            >
+              <User size={10} className="mr-1" /> Vacancies: {job.vacancies}
+            </Badge>
+          )}
           {job.remote && (
             <Badge
               variant="outline"
@@ -671,23 +826,6 @@ function JobCard({
       </CardContent>
 
       <CardFooter className="p-5 pt-0 flex gap-2 border-t border-neutral-50/50 bg-neutral-50/20">
-        {/* Responsive Download Button - Icon only on mobile, Icon + Text on laptop */}
-        {/* <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onDownload(job._id, job.title)}
-          disabled={isDownloading}
-          className="flex-1 h-9 rounded-xl border-neutral-200 font-semibold text-xs text-neutral-600 hover:bg-[#C8782A]/5 hover:text-[#C8782A] hover:border-[#C8782A]/20 transition-all cursor-pointer"
-        >
-          {isDownloading ? (
-            <Loader2 size={13} className="animate-spin" />
-          ) : (
-            <>
-              <Download size={13} className="sm:mr-1" />
-              <span className="hidden sm:inline">Download</span>
-            </>
-          )}
-        </Button> */}
         <Button
           variant="outline"
           size="sm"
@@ -735,7 +873,7 @@ function DeleteConfirmModal({
   isLoading: boolean;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent className="sm:max-w-md rounded-2xl border-0 shadow-2xl p-6">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-neutral-900">
@@ -805,7 +943,6 @@ function JobSkeletonCard() {
         <Skeleton className="h-9 flex-1 rounded-xl bg-neutral-200" />
         <Skeleton className="h-9 flex-1 rounded-xl bg-neutral-200" />
         <Skeleton className="h-9 flex-1 rounded-xl bg-neutral-200" />
-        <Skeleton className="h-9 flex-1 rounded-xl bg-neutral-200" />
       </CardFooter>
     </Card>
   );
@@ -826,8 +963,8 @@ function DashboardSkeleton() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 mb-8">
-          {[1, 2, 3].map((i) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-8">
+          {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
               className="bg-white p-5 rounded-2xl border border-[#C8782A]/10 h-[100px]"
@@ -867,9 +1004,26 @@ export default function EmployerDashboard() {
 
   const { session, isPending: sessionLoading } = useSession();
 
-  // Fetch employer's jobs
+  const { data: packageResponse, isLoading: packageLoading } = useQuery({
+    queryKey: ["employer-package", session?.user?.id],
+    queryFn: async () => {
+      const res = await fetch("/api/employer/package", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch package");
+      return res.json();
+    },
+    enabled: !!session?.user,
+  });
+
   const { data: jobsData, isLoading: jobsLoading } = useQuery({
-    queryKey: ["employer-jobs", statusFilter, searchQuery, currentPage],
+    queryKey: [
+      "employer-jobs",
+      statusFilter,
+      searchQuery,
+      currentPage,
+      session?.user?.id,
+    ],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (statusFilter !== "all") params.append("status", statusFilter);
@@ -877,28 +1031,33 @@ export default function EmployerDashboard() {
       params.append("page", currentPage.toString());
       params.append("limit", itemsPerPage.toString());
 
-      const res = await fetch(`/api/employer/jobs?${params.toString()}`);
+      const res = await fetch(`/api/employer/jobs?${params.toString()}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch jobs");
       return res.json();
     },
     enabled: !!session?.user,
   });
 
-  // Fetch stats
   const { data: statsData, isLoading: statsLoading } = useQuery({
-    queryKey: ["employer-stats"],
+    queryKey: ["employer-stats", session?.user?.id],
     queryFn: async () => {
-      const res = await fetch("/api/employer/stats");
+      const res = await fetch("/api/employer/stats", {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch stats");
       return res.json();
     },
     enabled: !!session?.user,
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (jobId: string) => {
-      const res = await fetch(`/api/jobs/${jobId}`, { method: "DELETE" });
+      const res = await fetch(`/api/jobs/${jobId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to delete job");
       return res.json();
     },
@@ -912,6 +1071,7 @@ export default function EmployerDashboard() {
       toast.error("Failed to delete job");
     },
   });
+
   const statusMutation = useMutation({
     mutationFn: async ({
       jobId,
@@ -923,6 +1083,7 @@ export default function EmployerDashboard() {
       const res = await fetch(`/api/jobs/${jobId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error("Failed to update status");
@@ -946,6 +1107,15 @@ export default function EmployerDashboard() {
     closedJobs: 0,
   };
 
+  const packageData: EmployerPackageData | null =
+    packageResponse?.package || null;
+  const remainingCredits = packageData?.remainingCredits ?? 0;
+  const unlimitedJobs = packageData?.unlimitedJobs ?? false;
+  const canPostJob = packageLoading
+    ? true
+    : unlimitedJobs || remainingCredits > 0;
+  const packageHasEnded = !packageLoading && !canPostJob;
+
   const handleDelete = () => {
     if (jobToDelete) {
       deleteMutation.mutate(jobToDelete._id);
@@ -965,7 +1135,9 @@ export default function EmployerDashboard() {
     try {
       toast.loading("Preparing download...", { id: "download" });
 
-      const response = await fetch(`/api/jobs/${jobId}/download`);
+      const response = await fetch(`/api/jobs/${jobId}/download`, {
+        credentials: "include",
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -989,7 +1161,9 @@ export default function EmployerDashboard() {
         error instanceof Error
           ? error.message
           : "Failed to download job posting",
-        { id: "download" },
+        {
+          id: "download",
+        },
       );
     } finally {
       setDownloadingJobId(null);
@@ -1058,19 +1232,45 @@ export default function EmployerDashboard() {
                 </span>
               </p>
             </div>
-            <Link href="/post-a-job">
-              <Button className="bg-[#C8782A] hover:bg-[#B06820] text-white font-bold h-11 px-5 rounded-xl shadow-md shadow-[#C8782A]/15 active:scale-[0.99] transition-all cursor-pointer">
-                <Plus size={16} className="mr-2 stroke-[2.5]" />
-                Post New Job
-              </Button>
-            </Link>
+
+            {packageLoading ? (
+              <div className="h-11 w-40 rounded-xl bg-[#C8782A]/15 animate-pulse" />
+            ) : canPostJob ? (
+              <Link href="/post-a-job">
+                <Button className="bg-[#C8782A] hover:bg-[#B06820] text-white font-bold h-11 px-5 rounded-xl shadow-md shadow-[#C8782A]/15 active:scale-[0.99] transition-all cursor-pointer">
+                  <Plus size={16} className="mr-2 stroke-[2.5]" />
+                  Post New Job
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/pricing">
+                <Button className="bg-rose-600 hover:bg-rose-700 text-white font-bold h-11 px-5 rounded-xl shadow-md active:scale-[0.99] transition-all cursor-pointer">
+                  Upgrade Plan
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Metric Statistics Cards Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 mb-8">
+        {packageHasEnded && (
+          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50/80 px-5 py-4 text-rose-700 shadow-sm">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-bold text-sm">
+                  Your job posting credits are exhausted.
+                </p>
+                <p className="text-sm mt-0.5 text-rose-600/90">
+                  Upgrade your plan to continue posting jobs.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-8">
           <StatCard
             title="Total Jobs"
             value={stats.totalJobs}
@@ -1089,9 +1289,16 @@ export default function EmployerDashboard() {
             icon={<X size={18} className="text-neutral-500" />}
             isLoading={statsLoading}
           />
+          <StatCard
+            title="Credits Left"
+            value={
+              packageLoading ? "..." : unlimitedJobs ? "∞" : remainingCredits
+            }
+            icon={<DollarSign size={18} className="text-[#C8782A]" />}
+            isLoading={packageLoading}
+          />
         </div>
 
-        {/* Dynamic Filter Controls Layout */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
             <Search
@@ -1125,85 +1332,147 @@ export default function EmployerDashboard() {
           </div>
         </div>
 
-        {/* Core Processing States Render */}
-        {jobsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {[...Array(4)].map((_, i) => (
-              <JobSkeletonCard key={i} />
-            ))}
-          </div>
-        ) : jobs.length === 0 ? (
-          <Card className="border border-dashed border-[#C8782A]/20 bg-[#FAF5EE]/10 text-center py-16 rounded-2xl">
-            <CardContent className="p-6">
-              <div className="w-14 h-14 bg-[#FAF5EE] border border-[#C8782A]/10 rounded-full flex items-center justify-center mx-auto mb-4 text-[#C8782A]/70">
-                <Briefcase size={24} />
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5 items-start">
+          <div>
+            {jobsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {[...Array(4)].map((_, i) => (
+                  <JobSkeletonCard key={i} />
+                ))}
               </div>
-              <h3 className="text-xl font-bold text-[#1C1C1C]">
-                No listings match criteria
-              </h3>
-              <p className="text-sm text-[#6B3A2A]/70 mt-1 max-w-sm mx-auto leading-relaxed">
-                {searchQuery || statusFilter !== "all"
-                  ? "We couldn't find anything matching your search. Try resetting filters."
-                  : "You haven't initialized any job listings on your business dashboard."}
-              </p>
-              {!searchQuery && statusFilter === "all" && (
-                <Link href="/post-a-job" className="inline-block mt-5">
-                  <Button className="bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold rounded-xl h-10 px-5 shadow-sm">
-                    <Plus size={15} className="mr-1.5" /> Post Your First Job
-                  </Button>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {jobs.map((job: Job) => (
-                <JobCard
-                  key={job._id}
-                  job={job}
-                  onView={() => setViewJob(job)}
-                  onEdit={() => handleEdit(job._id)}
-                  onDelete={() => setJobToDelete(job)}
-                  onStatusChange={handleStatusChange}
-                  onDownload={handleDownload}
-                  isDownloading={downloadingJobId === job._id}
-                />
-              ))}
-            </div>
-
-            {/* Pagination Controls Wrapper */}
-            {pagination.totalPages > 1 && (
-              <div className="flex justify-center items-center gap-1.5 mt-10">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="border-neutral-200 h-9 w-9 rounded-xl p-0 flex items-center justify-center"
-                >
-                  <ChevronLeft size={16} />
-                </Button>
-                <div className="bg-neutral-50 border border-neutral-100 rounded-xl px-4 h-9 flex items-center justify-center text-xs font-bold text-neutral-700 shadow-sm">
-                  Page {currentPage} of {pagination.totalPages}
+            ) : jobs.length === 0 ? (
+              <Card className="border border-dashed border-[#C8782A]/20 bg-[#FAF5EE]/10 text-center py-16 rounded-2xl">
+                <CardContent className="p-6">
+                  <div className="w-14 h-14 bg-[#FAF5EE] border border-[#C8782A]/10 rounded-full flex items-center justify-center mx-auto mb-4 text-[#C8782A]/70">
+                    <Briefcase size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold text-[#1C1C1C]">
+                    No listings match criteria
+                  </h3>
+                  <p className="text-sm text-[#6B3A2A]/70 mt-1 max-w-sm mx-auto leading-relaxed">
+                    {searchQuery || statusFilter !== "all"
+                      ? "We couldn't find anything matching your search. Try resetting filters."
+                      : packageHasEnded
+                        ? "Your credits are finished. Upgrade your plan to create new job postings."
+                        : "You haven't initialized any job listings on your business dashboard."}
+                  </p>
+                  {!searchQuery && statusFilter === "all" && (
+                    <div className="mt-5 flex items-center justify-center gap-3 flex-wrap">
+                      {canPostJob ? (
+                        <Link href="/post-a-job" className="inline-block">
+                          <Button className="bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold rounded-xl h-10 px-5 shadow-sm">
+                            <Plus size={15} className="mr-1.5" /> Post Your
+                            First Job
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Link href="/pricing" className="inline-block">
+                          <Button className="bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl h-10 px-5 shadow-sm">
+                            Upgrade Plan
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {jobs.map((job: Job) => (
+                    <JobCard
+                      key={job._id}
+                      job={job}
+                      onView={() => setViewJob(job)}
+                      onEdit={() => handleEdit(job._id)}
+                      onDelete={() => setJobToDelete(job)}
+                      onStatusChange={handleStatusChange}
+                      onDownload={handleDownload}
+                      isDownloading={downloadingJobId === job._id}
+                    />
+                  ))}
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((p) =>
-                      Math.min(pagination.totalPages, p + 1),
-                    )
-                  }
-                  disabled={currentPage === pagination.totalPages}
-                  className="border-neutral-200 h-9 w-9 rounded-xl p-0 flex items-center justify-center"
-                >
-                  <ChevronRight size={16} />
-                </Button>
-              </div>
+
+                {pagination.totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-1.5 mt-10">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="border-neutral-200 h-9 w-9 rounded-xl p-0 flex items-center justify-center"
+                    >
+                      <ChevronLeft size={16} />
+                    </Button>
+                    <div className="bg-neutral-50 border border-neutral-100 rounded-xl px-4 h-9 flex items-center justify-center text-xs font-bold text-neutral-700 shadow-sm">
+                      Page {currentPage} of {pagination.totalPages}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setCurrentPage((p) =>
+                          Math.min(pagination.totalPages, p + 1),
+                        )
+                      }
+                      disabled={currentPage === pagination.totalPages}
+                      className="border-neutral-200 h-9 w-9 rounded-xl p-0 flex items-center justify-center"
+                    >
+                      <ChevronRight size={16} />
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </div>
+
+          <aside className="space-y-5">
+            <PackageCard
+              pkg={packageData}
+              isLoading={packageLoading}
+              canPostJob={canPostJob}
+            />
+
+            <Card className="rounded-2xl border border-[#C8782A]/10 bg-white shadow-sm overflow-hidden">
+              <CardHeader className="p-5 pb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="p-2.5 bg-[#FAF5EE] rounded-xl border border-[#C8782A]/10 text-[#C8782A]">
+                    <Building2 size={17} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xs font-bold text-[#6B3A2A]/60 uppercase tracking-wider">
+                      Company Profile
+                    </CardTitle>
+                    <h3
+                      className="text-xl font-bold text-[#1C1C1C]"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      {session.user.name || session.user.email}
+                    </h3>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="px-5 pb-5 pt-0 space-y-2 text-sm text-[#6B3A2A]/80">
+                <div className="flex justify-between items-center py-1.5 border-b border-neutral-100">
+                  <span>Email</span>
+                  <span className="font-semibold text-[#1C1C1C] truncate max-w-[160px]">
+                    {session.user.email}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-1.5 border-b border-neutral-100">
+                  <span>Account</span>
+                  <span className="font-semibold text-[#1C1C1C]">Employer</span>
+                </div>
+                <div className="flex justify-between items-center py-1.5">
+                  <span>Current Status</span>
+                  <span className="font-semibold text-[#1C1C1C]">
+                    {packageData?.status || "Active"}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </aside>
+        </div>
       </div>
     </>
   );

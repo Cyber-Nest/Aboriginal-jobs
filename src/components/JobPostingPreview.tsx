@@ -1,7 +1,23 @@
-import { Briefcase, MapPin, Clock, DollarSign, Building2, Globe, BadgeCheck, Calendar, Code2, GraduationCap, Tag, CalendarDays, Mail, Phone, ChevronRight } from 'lucide-react';
+import {
+  Briefcase,
+  MapPin,
+  Clock,
+  DollarSign,
+  Building2,
+  Globe,
+  BadgeCheck,
+  Calendar,
+  Code2,
+  GraduationCap,
+  Tag,
+  CalendarDays,
+  Mail,
+  Phone,
+  ChevronRight,
+} from "lucide-react";
 
 export type ApplyMethod = {
-  method: 'email' | 'phone' | 'mail' | 'inPerson';
+  method: "email" | "phone" | "mail" | "inPerson";
   email?: string;
   phone?: string;
   mailAddress?: string;
@@ -20,6 +36,7 @@ export type JobPostingData = {
   requirementsHtml: string;
   indigenous: boolean;
   remote: boolean;
+  vacancies?: number;
   packageName: string;
   featured: boolean;
   nocCode?: string;
@@ -36,67 +53,77 @@ interface JobPostingPreviewProps {
 }
 
 const getSalaryDisplay = (salary: string, salaryType?: string): string => {
-  if (!salary) return 'Salary not specified';
+  if (!salary) return "Salary not specified";
   const typeMap: Record<string, string> = {
-    hour: '/hour',
-    week: '/week',
-    month: '/month',
-    year: '/year',
+    hour: "/hour",
+    week: "/week",
+    month: "/month",
+    year: "/year",
   };
-  const suffix = salaryType && typeMap[salaryType] ? typeMap[salaryType] : '';
+  const suffix = salaryType && typeMap[salaryType] ? typeMap[salaryType] : "";
   return `$${salary} CAD${suffix}`;
 };
 
 const getStartDateDisplay = (startDate: string): string => {
   const dateMap: Record<string, string> = {
-    asap: 'As Soon As Possible',
-    immediate: 'Immediate Joining',
-    '1week': 'Within 1 Week',
-    '2weeks': 'Within 2 Weeks',
-    '1month': 'Within 1 Month',
+    asap: "As Soon As Possible",
+    immediate: "Immediate Joining",
+    "1week": "Within 1 Week",
+    "2weeks": "Within 2 Weeks",
+    "1month": "Within 1 Month",
   };
-  return dateMap[startDate] || 'To be determined';
+  return dateMap[startDate] || "To be determined";
 };
 
 // Helper to format location without duplicate
 const getLocationDisplay = (location: string): string => {
-  if (!location) return '';
-  const parts = location.split(',').map(p => p.trim());
+  if (!location) return "";
+  const parts = location.split(",").map((p) => p.trim());
   const uniqueParts = [...new Set(parts)];
-  return uniqueParts.join(', ');
+  return uniqueParts.join(", ");
 };
 
 // Apply Method Card Component for Preview
 function ApplyMethodPreview({ method }: { method: ApplyMethod }) {
   const getMethodIcon = () => {
     switch (method.method) {
-      case 'email': return <Mail size={14} className="text-[#C8782A]" />;
-      case 'phone': return <Phone size={14} className="text-[#C8782A]" />;
-      case 'mail': return <MapPin size={14} className="text-[#C8782A]" />;
-      case 'inPerson': return <Building2 size={14} className="text-[#C8782A]" />;
-      default: return null;
+      case "email":
+        return <Mail size={14} className="text-[#C8782A]" />;
+      case "phone":
+        return <Phone size={14} className="text-[#C8782A]" />;
+      case "mail":
+        return <MapPin size={14} className="text-[#C8782A]" />;
+      case "inPerson":
+        return <Building2 size={14} className="text-[#C8782A]" />;
+      default:
+        return null;
     }
   };
 
   const getMethodTitle = () => {
     switch (method.method) {
-      case 'email': return 'Apply by Email';
-      case 'phone': return 'Apply by Phone';
-      case 'mail': return 'Apply by Mail';
-      case 'inPerson': return 'Apply in Person';
-      default: return '';
+      case "email":
+        return "Apply by Email";
+      case "phone":
+        return "Apply by Phone";
+      case "mail":
+        return "Apply by Mail";
+      case "inPerson":
+        return "Apply in Person";
+      default:
+        return "";
     }
   };
 
   const getMethodDetails = () => {
     switch (method.method) {
-      case 'email':
+      case "email":
         return method.email;
-      case 'phone':
+      case "phone":
         return method.phone;
-      case 'mail':
+      case "mail":
         return method.mailAddress;
-      case 'inPerson':
+      case "inPerson":
         return (
           <div className="space-y-1">
             <p className="text-xs">{method.inPersonAddress}</p>
@@ -108,7 +135,7 @@ function ApplyMethodPreview({ method }: { method: ApplyMethod }) {
           </div>
         );
       default:
-        return '';
+        return "";
     }
   };
 
@@ -116,7 +143,9 @@ function ApplyMethodPreview({ method }: { method: ApplyMethod }) {
     <div className="bg-[#FAF5EE] rounded-lg p-3">
       <div className="flex items-center gap-2 mb-2">
         {getMethodIcon()}
-        <h6 className="font-semibold text-xs text-[#1C1C1C]">{getMethodTitle()}</h6>
+        <h6 className="font-semibold text-xs text-[#1C1C1C]">
+          {getMethodTitle()}
+        </h6>
       </div>
       <div className="text-sm text-[#6B3A2A]/75 break-words">
         {getMethodDetails()}
@@ -166,18 +195,23 @@ export default function JobPostingPreview({ data }: JobPostingPreviewProps) {
       <div className="p-4 sm:p-5">
         {/* Header */}
         <div className="border-b border-[#C8782A]/10 pb-3 sm:pb-4 mb-3 sm:mb-4">
-          <h4 className="text-lg sm:text-xl font-bold text-[#1C1C1C] mb-2 line-clamp-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {data.title || 'Job Title'}
+          <h4
+            className="text-lg sm:text-xl font-bold text-[#1C1C1C] mb-2 line-clamp-2"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {data.title || "Job Title"}
           </h4>
           <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-[#6B3A2A]/70">
             <span className="flex items-center gap-1.5">
               <Building2 size={14} className="flex-shrink-0" />
-              <span className="truncate">{data.company || 'Company Name'}</span>
+              <span className="truncate">{data.company || "Company Name"}</span>
             </span>
             {data.location && (
               <span className="flex items-center gap-1.5">
                 <MapPin size={14} className="flex-shrink-0" />
-                <span className="truncate">{getLocationDisplay(data.location)}</span>
+                <span className="truncate">
+                  {getLocationDisplay(data.location)}
+                </span>
               </span>
             )}
           </div>
@@ -218,7 +252,9 @@ export default function JobPostingPreview({ data }: JobPostingPreviewProps) {
                 <Clock size={12} className="flex-shrink-0" />
                 <span className="text-xs font-medium">Employment Type</span>
               </div>
-              <p className="text-sm font-semibold text-[#1C1C1C] break-words">{data.employmentType}</p>
+              <p className="text-sm font-semibold text-[#1C1C1C] break-words">
+                {data.employmentType}
+              </p>
             </div>
           )}
 
@@ -228,17 +264,34 @@ export default function JobPostingPreview({ data }: JobPostingPreviewProps) {
                 <DollarSign size={12} className="flex-shrink-0" />
                 <span className="text-xs font-medium">Salary</span>
               </div>
-              <p className="text-sm font-semibold text-[#1C1C1C] break-words">{getSalaryDisplay(data.salary, data.salaryType)}</p>
+              <p className="text-sm font-semibold text-[#1C1C1C] break-words">
+                {getSalaryDisplay(data.salary, data.salaryType)}
+              </p>
             </div>
           )}
 
+          {data.vacancies && (
+            <div className="bg-[#FAF5EE] rounded-lg p-2.5">
+              <div className="flex items-center gap-1.5 text-[#C8782A] mb-1">
+                <Briefcase size={12} className="flex-shrink-0" />
+                <span className="text-xs font-medium">Vacancies</span>
+              </div>
+
+              <p className="text-sm font-semibold text-[#1C1C1C]">
+                {data.vacancies}{" "}
+                {data.vacancies > 1 ? "Open Positions" : "Open Position"}
+              </p>
+            </div>
+          )}
           {data.runDays && (
             <div className="bg-[#FAF5EE] rounded-lg p-2.5">
               <div className="flex items-center gap-1.5 text-[#C8782A] mb-1">
                 <CalendarDays size={12} className="flex-shrink-0" />
                 <span className="text-xs font-medium">Posted for</span>
               </div>
-              <p className="text-sm font-semibold text-[#1C1C1C]">{data.runDays} days</p>
+              <p className="text-sm font-semibold text-[#1C1C1C]">
+                {data.runDays} days
+              </p>
             </div>
           )}
 
@@ -248,7 +301,10 @@ export default function JobPostingPreview({ data }: JobPostingPreviewProps) {
                 <GraduationCap size={12} className="flex-shrink-0" />
                 <span className="text-xs font-medium">Experience</span>
               </div>
-              <p className="text-sm font-semibold text-[#1C1C1C]">{data.experience} {parseInt(data.experience) > 1 ? 'years' : 'year'}</p>
+              <p className="text-sm font-semibold text-[#1C1C1C]">
+                {data.experience}{" "}
+                {parseInt(data.experience) > 1 ? "years" : "year"}
+              </p>
             </div>
           )}
 
@@ -258,7 +314,9 @@ export default function JobPostingPreview({ data }: JobPostingPreviewProps) {
                 <Calendar size={12} className="flex-shrink-0" />
                 <span className="text-xs font-medium">Start Date</span>
               </div>
-              <p className="text-sm font-semibold text-[#1C1C1C]">{getStartDateDisplay(data.startDate)}</p>
+              <p className="text-sm font-semibold text-[#1C1C1C]">
+                {getStartDateDisplay(data.startDate)}
+              </p>
             </div>
           )}
         </div>
@@ -329,7 +387,7 @@ export default function JobPostingPreview({ data }: JobPostingPreviewProps) {
                   rel="noopener noreferrer"
                   className="text-xs text-[#1a64c4] hover:underline break-all"
                 >
-                  {data.website.replace(/^https?:\/\//, '')}
+                  {data.website.replace(/^https?:\/\//, "")}
                 </a>
               </div>
             </div>
