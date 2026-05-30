@@ -13,7 +13,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   //add in future, url
-  metadataBase: new URL("https://aboriginaljobscanada.com"),
+  metadataBase: new URL("https://aboriginal-jobs.ca"),
 
   title: {
     default: "Aboriginal Jobs Canada — Canada's Indigenous Job Platform",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_CA",
-    url: "https://aboriginaljobscanada.com",
+    url: "https://aboriginal-jobs.ca",
     siteName: "Aboriginal Jobs Canada",
     title: "Aboriginal Jobs Canada — Canada's Indigenous Job Platform",
     description:
@@ -86,9 +86,8 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
 
-  //add  in future, url
   alternates: {
-    canonical: "https://aboriginaljobscanada.com",
+    canonical: "https://aboriginal-jobs.ca",
   },
 
   category: "jobs",

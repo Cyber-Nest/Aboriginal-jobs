@@ -328,7 +328,7 @@ function formatSalary(salary: string, salaryType?: string): string {
     year: "/year",
   };
   const suffix = salaryType && typeMap[salaryType] ? typeMap[salaryType] : "";
-  return `$${salary} CAD${suffix}`;
+  return `${salary} CAD${suffix}`;
 }
 
 function getStartDateLabel(startDate: string): string {
