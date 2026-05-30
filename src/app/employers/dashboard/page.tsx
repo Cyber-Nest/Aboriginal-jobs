@@ -93,6 +93,7 @@ interface Job {
   website?: string;
   vacancies?: number;
   packageId?: string | null;
+  postDate?: string;
   creditConsumed?: boolean;
 }
 
@@ -123,6 +124,22 @@ function formatDate(date: string) {
   return new Date(date).toLocaleDateString("en-CA", {
     year: "numeric",
     month: "short",
+    day: "numeric",
+  });
+}
+
+function calculateClosingDate(
+  postDate?: string | Date,
+  runDays?: string,
+): string {
+  if (!postDate || !runDays) return "Not specified";
+
+  const closingDate = new Date(postDate);
+  closingDate.setDate(closingDate.getDate() + Number(runDays));
+
+  return closingDate.toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "long",
     day: "numeric",
   });
 }
@@ -167,7 +184,7 @@ function getSalaryDisplay(salary: string, salaryType: string): string {
     month: "/mo",
     year: "/yr",
   };
-  return `$${salary}${typeMap[salaryType] || ""}`;
+  return `${salary}${typeMap[salaryType] || ""}`;
 }
 
 /* ── Stat Card Component ────────────────────────────── */
@@ -536,7 +553,7 @@ function ViewJobModal({
                 Posted Date
               </p>
               <p className="text-sm font-semibold text-neutral-800 mt-1">
-                {formatDate(job.postedAt)}
+                {formatDate(job.postDate as any)}
               </p>
             </div>
             <div>
@@ -544,7 +561,7 @@ function ViewJobModal({
                 Expiry Date
               </p>
               <p className="text-sm font-semibold text-neutral-800 mt-1 text-rose-700">
-                {formatDate(job.expiresAt)}
+                {calculateClosingDate(job.postDate as any, job.runDays as any)}
               </p>
             </div>
           </div>
@@ -785,7 +802,9 @@ function JobCard({
               size={13}
               className="text-[#C8782A] flex-shrink-0 opacity-60"
             />
-            <span className="truncate">Posted: {formatDate(job.postedAt)}</span>
+            <span className="truncate">
+              Posted: {formatDate(job.postDate as any)}
+            </span>
           </div>
         </div>
 

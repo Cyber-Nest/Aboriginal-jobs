@@ -11,52 +11,57 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
+
     const category = searchParams.get("category");
     const province = searchParams.get("province");
     const employmentType = searchParams.get("employmentType");
     const remote = searchParams.get("remote");
     const search = searchParams.get("search");
+
     const limit = parseInt(searchParams.get("limit") || "20");
     const page = parseInt(searchParams.get("page") || "1");
     const skip = (page - 1) * limit;
 
-    // Build query
-    const query: any = { status: "active" };
+    const query: any = {
+      status: "active",
+      $and: [
+        {
+          $or: [
+            { expiresAt: { $eq: null } },
+            { expiresAt: { $gt: new Date() } },
+          ],
+        },
+      ],
+    };
 
-    // Category filter
+    // Category Filter
     if (category && category !== "all") {
       query.category = category;
     }
 
-    // Province filter
+    // Province Filter
     if (province && province !== "all") {
       query.province = province;
     }
 
-    // Employment type filter
+    // Employment Type Filter
     if (employmentType && employmentType !== "all") {
       query.employmentType = employmentType;
     }
 
-    // Remote filter
+    // Remote Filter
     if (remote === "true") {
       query.remote = true;
     }
 
-    // Search filter
-    if (search && search.trim()) {
+    // Search Filter
+    if (search?.trim()) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
         { company: { $regex: search, $options: "i" } },
         { descriptionHtml: { $regex: search, $options: "i" } },
       ];
     }
-
-    query.$and = [
-      {
-        $or: [{ expiresAt: { $eq: null } }, { expiresAt: { $gt: new Date() } }],
-      },
-    ];
 
     const [jobs, total] = await Promise.all([
       Job.find(query)
@@ -67,9 +72,66 @@ export async function GET(request: NextRequest) {
       Job.countDocuments(query),
     ]);
 
+    const formattedJobs = jobs.map((job: any) => {
+      let formattedExperience = "";
+
+      if (job.experience) {
+        if (!isNaN(Number(job.experience))) {
+          const years = Number(job.experience);
+
+          formattedExperience = `${years} ${years === 1 ? "year" : "years"}`;
+        } else if (
+          job.experience.includes("+") &&
+          !job.experience.toLowerCase().includes("year")
+        ) {
+          formattedExperience = `${job.experience} year`;
+        } else {
+          formattedExperience = job.experience;
+        }
+      }
+
+      return {
+        _id: job._id,
+
+        jobId: job.jobId || null,
+
+        title: job.title,
+
+        company: job.company,
+
+        location:
+          job.location || [job.city, job.province].filter(Boolean).join(", "),
+
+        salary: job.salary && job.salaryType ? `${job.salary}` : "",
+
+        employmentType: job.employmentType,
+
+        nocCode: job.nocCode,
+
+        experience: formattedExperience,
+
+        startDate:
+          job.startDate === "immediate"
+            ? "Immediate"
+            : job.startDate === "asap"
+              ? "Immediate"
+              : job.startDate === "1week"
+                ? "Within 1 week"
+                : job.startDate,
+
+        postDate: job.postDate,
+
+        remote: Boolean(job.remote),
+
+        indigenousOwned: Boolean(job.indigenousOwned),
+
+        vacancies: job.vacancies || null,
+      };
+    });
+
     return NextResponse.json({
       success: true,
-      data: jobs,
+      data: formattedJobs,
       pagination: {
         total,
         page,
@@ -79,9 +141,14 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Fetch jobs error:", error);
+
     return NextResponse.json(
-      { error: "Something went wrong." },
-      { status: 500 },
+      {
+        error: "Something went wrong.",
+      },
+      {
+        status: 500,
+      },
     );
   }
 }

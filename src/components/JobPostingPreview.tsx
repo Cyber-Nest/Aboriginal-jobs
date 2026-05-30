@@ -61,7 +61,7 @@ const getSalaryDisplay = (salary: string, salaryType?: string): string => {
     year: "/year",
   };
   const suffix = salaryType && typeMap[salaryType] ? typeMap[salaryType] : "";
-  return `$${salary} CAD${suffix}`;
+  return `${salary} CAD${suffix}`;
 };
 
 const getStartDateDisplay = (startDate: string): string => {

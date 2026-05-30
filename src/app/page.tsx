@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { AnimatePresence, motion, useInView } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import {
   Code2,
   Calendar,
   Loader2,
+  DollarSign,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +87,7 @@ const statsData = [
 
 // ─── Job Card Component for Search Results ────────────────────────────────────
 interface JobCardProps {
+  location: ReactNode;
   _id: string;
   title: string;
   company: string;
@@ -114,7 +116,7 @@ function JobSearchCard({ job }: { job: JobCardProps }) {
       month: "/mo",
       year: "/yr",
     };
-    return `$${salary}${typeMap[salaryType || "hour"] || ""}`;
+    return `${salary}${typeMap[salaryType || "hour"] || ""}`;
   };
 
   const getStartDateLabel = (startDate?: string) => {
@@ -184,7 +186,7 @@ function JobSearchCard({ job }: { job: JobCardProps }) {
           <span className="inline-flex items-center gap-1.5 text-xs text-[#6B3A2A]/65 min-w-0">
             <MapPin size={11} className="text-[#C8782A] flex-shrink-0" />
             <span className="truncate">
-              {job.city}, {job.province}
+              {job.location}
             </span>
           </span>
           <span className="inline-flex items-center gap-1.5 text-xs text-[#6B3A2A]/65">
@@ -194,7 +196,7 @@ function JobSearchCard({ job }: { job: JobCardProps }) {
           {formatSalary(job.salary, job.salaryType) !==
             "Salary not specified" && (
             <span className="inline-flex items-center gap-1.5 text-xs text-[#6B3A2A]/65">
-              <Star size={11} className="text-[#C8782A]" />
+              <DollarSign size={11} className="text-[#C8782A]" />
               {formatSalary(job.salary, job.salaryType)}
             </span>
           )}
@@ -860,7 +862,7 @@ export default function HomePage() {
                   <div className="flex items-center gap-1.5 text-[#1C1C1C]/50 text-sm mb-5">
                     <MapPin size={13} />
                     <span>
-                      {job.city}, {job.province}
+                      {job.location}
                     </span>
                   </div>
                   <div className="inline-flex items-center gap-1 text-[#C8782A] text-sm font-semibold group-hover:gap-2 transition-all duration-200">
@@ -1071,256 +1073,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 5. PACKAGES PREVIEW ─────────────────────────────────────────────── */}
-      {/* <section className="bg-[#FAF5EE] py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="text-center mb-12"
-          >
-            <motion.p
-              variants={fadeUp}
-              className="text-[#C8782A] font-semibold text-sm uppercase tracking-widest mb-3"
-            >
-              Employer Packages
-            </motion.p>
-
-            <motion.h2
-              variants={fadeUp}
-              className="text-4xl lg:text-5xl font-bold text-[#1C1C1C]"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-              }}
-            >
-              Packages for Every Hiring Need
-            </motion.h2>
-
-            <motion.p
-              variants={fadeUp}
-              className="text-[#6B3A2A]/70 mt-4 max-w-xl mx-auto"
-            >
-              Whether you're hiring for one position or building a long-term
-              Indigenous workforce strategy, we have the perfect package for
-              your organization.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
-          >
-            {[
-              {
-                name: "Basic Job Posting",
-
-                tagline: "Perfect for first-time hiring",
-
-                features: [
-                  "1 Job Posting Credit",
-
-                  "180 Days Job Visibility",
-
-                  "Standard Search Placement",
-
-                  "Email Applicant Notifications",
-
-                  "Employer Dashboard Access",
-                ],
-
-                cta: "View Package",
-
-                highlight: false,
-              },
-
-              {
-                name: "Featured Job Posting",
-
-                tagline: "Boost visibility & attract more applicants",
-
-                features: [
-                  "3 Job Posting Credits",
-
-                  "Featured Job Badge",
-
-                  "Priority Search Placement",
-
-                  "Advanced Applicant Management",
-
-                  "180 Days Package Validity",
-                ],
-
-                cta: "View Package",
-
-                highlight: true,
-
-                badge: "Most Popular",
-              },
-
-              {
-                name: "Employer Branding Package",
-
-                tagline: "Build trust with Indigenous communities",
-
-                features: [
-                  "10 Job Posting Credits",
-
-                  "Dedicated Employer Branding",
-
-                  "Company Logo & Banner Visibility",
-
-                  "Priority Employer Support",
-
-                  "Multiple Active Job Listings",
-                ],
-
-                cta: "View Package",
-
-                highlight: false,
-              },
-
-              {
-                name: "Monthly Hiring Support",
-
-                tagline: "Unlimited hiring with dedicated support",
-
-                features: [
-                  "Unlimited Job Postings",
-
-                  "365 Days Active Access",
-
-                  "Dedicated Hiring Assistance",
-
-                  "Monthly Hiring Reports",
-
-                  "Premium Employer Support",
-                ],
-
-                cta: "View Package",
-
-                highlight: false,
-              },
-            ].map((pkg) => (
-              <motion.div
-                key={pkg.name}
-                variants={fadeUp}
-                whileHover={{
-                  y: -5,
-
-                  boxShadow: pkg.highlight
-                    ? "0 20px 50px rgba(200,120,42,0.3)"
-                    : "0 12px 30px rgba(107,58,42,0.12)",
-                }}
-                className={`rounded-2xl p-7 relative transition-shadow duration-200 flex flex-col h-full ${
-                  pkg.highlight
-                    ? "bg-[#C8782A] text-white ring-2 ring-[#C8782A] shadow-xl"
-                    : "bg-white border border-[#C8782A]/10"
-                }`}
-              >
-                {pkg.badge && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="bg-[#6B3A2A] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap">
-                      {pkg.badge}
-                    </span>
-                  </div>
-                )}
-
-                <div
-                  className={`w-10 h-10 rounded-xl mb-5 flex items-center justify-center ${
-                    pkg.highlight ? "bg-white/20" : "bg-[#C8782A]/10"
-                  }`}
-                >
-                  <Star
-                    size={18}
-                    className={pkg.highlight ? "text-white" : "text-[#C8782A]"}
-                  />
-                </div>
-
-                <h3
-                  className={`font-bold text-lg mb-1 ${
-                    pkg.highlight ? "text-white" : "text-[#1C1C1C]"
-                  }`}
-                  style={{
-                    fontFamily: "'Playfair Display', serif",
-                  }}
-                >
-                  {pkg.name}
-                </h3>
-
-                <p
-                  className={`text-sm mb-5 ${
-                    pkg.highlight ? "text-white/75" : "text-[#6B3A2A]/60"
-                  }`}
-                >
-                  {pkg.tagline}
-                </p>
-
-                <ul className="flex flex-col gap-2.5 mb-7 flex-1">
-                  {pkg.features.map((f) => (
-                    <li
-                      key={f}
-                      className={`flex items-start gap-2.5 text-sm ${
-                        pkg.highlight ? "text-white/90" : "text-[#1C1C1C]/70"
-                      }`}
-                    >
-                      <CheckCircle
-                        size={14}
-                        className={`flex-shrink-0 mt-0.5 ${
-                          pkg.highlight ? "text-white" : "text-[#7A9E7E]"
-                        }`}
-                      />
-
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <Link href="/pricing" className="mt-auto">
-                  <Button
-                    className={`w-full font-semibold transition-all duration-200 ${
-                      pkg.highlight
-                        ? "bg-white text-[#C8782A] hover:bg-[#FAF5EE]"
-                        : "bg-[#C8782A] hover:bg-[#B06820] text-white"
-                    }`}
-                  >
-                    {pkg.cta}
-                  </Button>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{
-              opacity: 1,
-              y: 0,
-            }}
-            viewport={{ once: true }}
-            transition={{
-              duration: 0.5,
-              delay: 0.4,
-            }}
-            className="text-center mt-10"
-          >
-            <Link href="/pricing">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-[#C8782A] text-[#C8782A] hover:bg-[#C8782A] hover:text-white font-semibold px-10 transition-all duration-200"
-              >
-                View All Packages
-                <ArrowRight size={16} className="ml-2" />
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-      </section> */}
 
       {/* ── 5. PACKAGES PREVIEW ─────────────────────────────────────────────── */}
       <section className="bg-[#FAF5EE] py-16 lg:py-24 relative overflow-hidden">

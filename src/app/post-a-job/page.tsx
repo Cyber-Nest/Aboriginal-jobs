@@ -479,7 +479,7 @@ function PostAJobContent() {
             setSalaryType(job.salaryType || "hour");
             setNocCode(job.nocCode || "");
             setRunDays(job.runDays || "30");
-            setVacancies(job.vacancies || "");
+            setVacancies(job.vacancies || "1");
             setExperience(job.experience || "");
             setStartDate(job.startDate || "");
             setWebsite(job.website || "");
