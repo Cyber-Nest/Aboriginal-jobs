@@ -93,12 +93,10 @@ export default function ContactPage() {
     }
     if (!formData.email.trim()) {
       newErrors.email = "Email address is required";
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-    if (!formData.subject) {
-      newErrors.subject = "Please select an option";
-    }
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim()))
+      if (!formData.subject) {
+        newErrors.subject = "Please select an option";
+      }
     if (!formData.message.trim()) {
       newErrors.message = "Message is required";
     } else if (formData.message.trim().length < 10) {
@@ -109,7 +107,7 @@ export default function ContactPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -117,48 +115,47 @@ export default function ContactPage() {
       return;
     }
 
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    // Prepare email content
-    const subjectMap: Record<string, string> = {
-      jobseeker: "Job Seeker",
-      employer: "Employer",
-      organization: "Indigenous Organization",
-      other: "Other",
-    };
-    const userType = subjectMap[formData.subject] || formData.subject;
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          email: formData.email.trim().toLowerCase(),
+          subject: formData.subject,
+          message: formData.message.trim(),
+        }),
+      });
 
-    const emailSubject = `Contact Form: ${userType} - ${formData.firstName} ${formData.lastName}`;
-    const emailBody = `
-Name: ${formData.firstName} ${formData.lastName}
-Email: ${formData.email}
-User Type: ${userType}
+      const data = await response.json();
 
-Message:
-${formData.message}
-    `.trim();
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send message");
+      }
 
-    // Mailto link
-    const mailtoLink = `mailto:info.aboriginal@cyber-nest.ca?subject=${encodeURIComponent(
-      emailSubject,
-    )}&body=${encodeURIComponent(emailBody)}`;
+      toast.success(
+        "Your message has been sent successfully. We'll get back to you soon.",
+      );
 
-    // Open email client
-    window.location.href = mailtoLink;
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
 
-    // Show success message
-    toast.success("Email client opened! Please review and send the email.");
-
-    // Reset form
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      subject: "",
-      message: "",
-    });
-
-    setIsLoading(false);
+      setErrors({});
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send message");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -412,13 +409,20 @@ ${formData.message}
                   <Button
                     type="submit"
                     size="lg"
-                    disabled={isLoading}
+                    disabled={
+                      isLoading ||
+                      !formData.firstName.trim() ||
+                      !formData.lastName.trim() ||
+                      !formData.email.trim() ||
+                      !formData.subject ||
+                      !formData.message.trim()
+                    }
                     className="bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold w-full disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <>
                         <Loader2 size={16} className="mr-2 animate-spin" />
-                        Opening Email...
+                        Sending Message...
                       </>
                     ) : (
                       <>

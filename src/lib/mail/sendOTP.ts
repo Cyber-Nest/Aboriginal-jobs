@@ -1,17 +1,9 @@
-import nodemailer from "nodemailer";
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+import { transporter } from "./transporter";
 
 export const sendOTP = async (
   email: string,
   otp: string,
-  purpose: "registration" | "password_reset" = "registration"
+  purpose: "registration" | "password_reset" = "registration",
 ) => {
   try {
     // Dynamic Content
@@ -28,8 +20,7 @@ export const sendOTP = async (
       password_reset: {
         subject: "Aboriginal Jobs Canada | Reset Your Password",
         heading: "Password Reset Request",
-        subHeading:
-          "We received a request to reset your password.",
+        subHeading: "We received a request to reset your password.",
         instruction:
           "Use the verification code below to continue resetting your password.",
       },

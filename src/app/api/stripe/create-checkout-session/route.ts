@@ -12,9 +12,13 @@ import { PaymentTransaction } from "@/lib/models/PaymentTransaction";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const PACKAGE_CONFIG = {
+  // Starter: {
+  //   credits: 1,
+  //   amount: 12.5,
+  // },
   Starter: {
     credits: 1,
-    amount: 12.5,
+    amount: 0.50,
   },
 
   Deluxe: {
