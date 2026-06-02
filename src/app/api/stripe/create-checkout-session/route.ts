@@ -16,6 +16,10 @@ const PACKAGE_CONFIG = {
     credits: 1,
     amount: 12.5,
   },
+  // Starter: {
+  //   credits: 1,
+  //   amount: 0.50,
+  // },
 
   Deluxe: {
     credits: 5,

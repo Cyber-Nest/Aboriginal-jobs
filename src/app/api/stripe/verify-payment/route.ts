@@ -16,6 +16,12 @@ const PACKAGE_CONFIG = {
     expiryDays: 180,
     amount: 12.5,
   },
+  // Starter: {
+  //   credits: 1,
+  //   unlimitedJobs: false,
+  //   expiryDays: 180,
+  //   amount: 0.50,
+  // },
 
   Deluxe: {
     credits: 5,
