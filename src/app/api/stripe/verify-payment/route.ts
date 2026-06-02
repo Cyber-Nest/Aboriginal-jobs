@@ -10,18 +10,18 @@ import { PaymentTransaction } from "@/lib/models/PaymentTransaction";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const PACKAGE_CONFIG = {
-  // Starter: {
-  //   credits: 1,
-  //   unlimitedJobs: false,
-  //   expiryDays: 180,
-  //   amount: 12.5,
-  // },
   Starter: {
     credits: 1,
     unlimitedJobs: false,
     expiryDays: 180,
-    amount: 0.50,
+    amount: 12.5,
   },
+  // Starter: {
+  //   credits: 1,
+  //   unlimitedJobs: false,
+  //   expiryDays: 180,
+  //   amount: 0.50,
+  // },
 
   Deluxe: {
     credits: 5,
