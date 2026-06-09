@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import AppShell from "@/components/AppShell";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -102,13 +103,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <div className="min-h-screen bg-background flex flex-col">
+          {/* <div className="min-h-screen bg-background flex flex-col">
             <Header />
 
             <main className="flex-1">{children}</main>
 
             <Footer />
-          </div>
+          </div> */}
+
+          <AppShell>{children}</AppShell>
 
           {/*Toast UI */}
           <Toaster

@@ -58,29 +58,20 @@ export async function POST(request: NextRequest) {
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        {
-          error: "Authentication required.",
-        },
-        {
-          status: 401,
-        },
+        { error: "Authentication required." },
+        { status: 401 },
       );
     }
 
     const body = await request.json();
 
     const packageName = body.packageName?.trim();
-
     const promoCode = body.promoCode?.trim()?.toUpperCase();
 
     if (!packageName || !promoCode) {
       return NextResponse.json(
-        {
-          error: "Package and promo code are required.",
-        },
-        {
-          status: 400,
-        },
+        { error: "Package and coupon code are required." },
+        { status: 400 },
       );
     }
 
@@ -89,12 +80,8 @@ export async function POST(request: NextRequest) {
 
     if (!selectedPackage) {
       return NextResponse.json(
-        {
-          error: "Invalid package selected.",
-        },
-        {
-          status: 400,
-        },
+        { error: "Invalid package selected." },
+        { status: 400 },
       );
     }
 
@@ -104,67 +91,46 @@ export async function POST(request: NextRequest) {
 
     if (!employer) {
       return NextResponse.json(
-        {
-          error: "Employer not found.",
-        },
-        {
-          status: 404,
-        },
+        { error: "Employer not found." },
+        { status: 404 },
       );
     }
 
-    const promo = await PromoCode.findOne({
-      code: promoCode,
-      packageName,
-      active: true,
-    });
+    // ATOMIC REDEMPTION — findOneAndUpdate with status check to prevent race conditions
+    // Only succeeds if coupon is still "Unused" at the time of update
+    const redeemedCoupon = await PromoCode.findOneAndUpdate(
+      {
+        code: promoCode,
+        packageName,
+        status: "Unused", // Race condition guard — atomic check + update
+      },
+      {
+        $set: {
+          status: "Used",
+          redeemedName: session.user.name || session.user.email,
+          redeemedEmail: session.user.email,
+          redeemedAt: new Date(),
+          employerId: employer._id,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
 
-    if (!promo) {
+    if (!redeemedCoupon) {
       return NextResponse.json(
-        {
-          error: "Invalid promo code.",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    if (promo.expiresAt && promo.expiresAt < new Date()) {
-      return NextResponse.json(
-        {
-          error: "Promo code expired.",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    if (promo.maxUses && promo.usedCount >= promo.maxUses) {
-      return NextResponse.json(
-        {
-          error: "Promo usage limit reached.",
-        },
-        {
-          status: 400,
-        },
+        { error: "Invalid coupon code or coupon has already been used." },
+        { status: 400 },
       );
     }
 
     const now = new Date();
-
     const expiresAt = new Date();
-
     expiresAt.setDate(expiresAt.getDate() + selectedPackage.expiryDays);
 
-    // PROMO USED COUNT
-
-    promo.usedCount += 1;
-
-    await promo.save();
-
-    // PACKAGE
+    // PACKAGE UPDATE
 
     const existingPackage = await EmployerPackage.findOne({
       employerId: employer._id,
@@ -172,20 +138,14 @@ export async function POST(request: NextRequest) {
 
     if (existingPackage) {
       existingPackage.packageName = packageName;
-
       existingPackage.unlimitedJobs = selectedPackage.unlimitedJobs;
-
       existingPackage.isFreePlan = false;
-
       existingPackage.status = "Active";
-
       existingPackage.purchasedAt = now;
-
       existingPackage.expiresAt = expiresAt;
 
       if (!selectedPackage.unlimitedJobs) {
         existingPackage.remainingCredits += selectedPackage.credits;
-
         existingPackage.totalCreditsPurchased += selectedPackage.credits;
       }
 
@@ -193,25 +153,15 @@ export async function POST(request: NextRequest) {
     } else {
       await EmployerPackage.create({
         employerId: employer._id,
-
         packageName,
-
         remainingCredits: selectedPackage.credits,
-
         totalCreditsPurchased: selectedPackage.credits,
-
         unlimitedJobs: selectedPackage.unlimitedJobs,
-
         isFreePlan: false,
-
         jobPostExpiryDays: selectedPackage.expiryDays,
-
         status: "Active",
-
         purchasedAt: now,
-
         expiresAt,
-
         creditExpiresAt: null,
       });
     }
@@ -220,21 +170,13 @@ export async function POST(request: NextRequest) {
 
     const payment = await PaymentTransaction.create({
       employerId: employer._id,
-
       packageName,
-
       amount: 0,
-
       currency: "CAD",
-
       paymentStatus: "paid",
-
-      paymentProvider: "promo",
-
-      paymentMethod: "Promo Code",
-
+      paymentProvider: "coupon",
+      paymentMethod: "Coupon Code",
       promoCodeUsed: promoCode,
-
       isPromoPayment: true,
     });
 
@@ -242,51 +184,31 @@ export async function POST(request: NextRequest) {
 
     await EmployerPackageHistory.create({
       employerId: employer._id,
-
       packageName,
-
       creditsAdded: selectedPackage.credits,
-
       unlimitedJobs: selectedPackage.unlimitedJobs,
-
       promoCodeUsed: promoCode,
-
       isFreePlan: false,
-
       jobPostExpiryDays: selectedPackage.expiryDays,
-
       purchasedAt: now,
-
       expiresAt,
-
       paymentStatus: "paid",
-
-      paymentProvider: "promo",
-
-      paymentMethod: "Promo Code",
-
+      paymentProvider: "coupon",
+      paymentMethod: "Coupon Code",
       transactionId: String(payment._id),
-
       amount: 0,
-
       currency: "CAD",
     });
 
     return NextResponse.json({
       success: true,
-
-      message: "Promo applied successfully.",
+      message: "Coupon applied and package activated successfully.",
     });
   } catch (error) {
     console.error("PROMO VERIFY ERROR:", error);
-
     return NextResponse.json(
-      {
-        error: "Failed to verify promo code.",
-      },
-      {
-        status: 500,
-      },
+      { error: "Failed to redeem coupon." },
+      { status: 500 },
     );
   }
 }
