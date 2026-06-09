@@ -75,8 +75,8 @@ function fmtDate(d: string | null) {
 export default function CouponManagementPage() {
   const [stats, setStats] = useState<PackageStat[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
-  const [seedDone, setSeedDone] = useState(false);
+  // const [seeding, setSeeding] = useState(false);
+  // const [seedDone, setSeedDone] = useState(false);
 
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -118,21 +118,21 @@ export default function CouponManagementPage() {
 
   // ─── Seed Coupons ──────────────────────────────────────────────────────────
 
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      const res = await fetch("/api/admin/coupons/seed", { method: "POST" });
-      const data = await res.json();
-      if (data.success) {
-        setSeedDone(true);
-        await fetchStats();
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSeeding(false);
-    }
-  };
+  // const handleSeed = async () => {
+  //   setSeeding(true);
+  //   try {
+  //     const res = await fetch("/api/admin/coupons/seed", { method: "POST" });
+  //     const data = await res.json();
+  //     if (data.success) {
+  //       setSeedDone(true);
+  //       await fetchStats();
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   } finally {
+  //     setSeeding(false);
+  //   }
+  // };
 
   // ─── Fetch Coupons (Table) ─────────────────────────────────────────────────
 
@@ -326,7 +326,7 @@ export default function CouponManagementPage() {
             </button>
           )}
 
-          <button
+          {/* <button
             onClick={handleSeed}
             disabled={seeding}
             className="flex items-center gap-2 bg-[#C8782A] hover:bg-[#B06820] disabled:opacity-60 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
@@ -342,7 +342,7 @@ export default function CouponManagementPage() {
                 {seedDone ? "Re-Generate Coupons" : "Generate Coupons"}
               </>
             )}
-          </button>
+          </button> */}
         </div>
       </div>
 
