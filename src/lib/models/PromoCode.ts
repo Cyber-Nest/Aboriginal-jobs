@@ -8,36 +8,64 @@ const PromoCodeSchema = new Schema(
       unique: true,
       uppercase: true,
       trim: true,
+      index: true,
     },
 
     packageName: {
       type: String,
       required: true,
       trim: true,
+      index: true,
     },
 
-    active: {
-      type: Boolean,
-      default: true,
+    status: {
+      type: String,
+      enum: ["Unused", "Used"],
+      default: "Unused",
+      index: true,
     },
 
-    usedCount: {
-      type: Number,
-      default: 0,
-    },
-
-    maxUses: {
-      type: Number,
+    // Assignment Info
+    assignedName: {
+      type: String,
       default: null,
+      trim: true,
     },
 
-    expiresAt: {
+    assignedEmail: {
+      type: String,
+      default: null,
+      trim: true,
+      lowercase: true,
+    },
+
+    assignedAt: {
       type: Date,
       default: null,
     },
 
-    createdBy: {
+    // Redemption Info
+    redeemedName: {
       type: String,
+      default: null,
+      trim: true,
+    },
+
+    redeemedEmail: {
+      type: String,
+      default: null,
+      trim: true,
+      lowercase: true,
+    },
+
+    redeemedAt: {
+      type: Date,
+      default: null,
+    },
+
+    employerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Employer",
       default: null,
     },
   },
@@ -46,9 +74,8 @@ const PromoCodeSchema = new Schema(
   },
 );
 
-PromoCodeSchema.index({
-  code: 1,
-});
+PromoCodeSchema.index({ code: 1, packageName: 1 });
+PromoCodeSchema.index({ packageName: 1, status: 1 });
 
 export const PromoCode =
   models.PromoCode || model("PromoCode", PromoCodeSchema);

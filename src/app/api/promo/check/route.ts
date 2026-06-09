@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { connectDB } from "@/lib/db/mongoose";
 import { PromoCode } from "@/lib/models/PromoCode";
 
@@ -10,76 +9,46 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const packageName = body.packageName?.trim();
-
     const promoCode = body.promoCode?.trim()?.toUpperCase();
 
     if (!packageName || !promoCode) {
       return NextResponse.json(
-        {
-          error: "Package and promo code are required.",
-        },
-        {
-          status: 400,
-        },
+        { error: "Package and coupon code are required." },
+        { status: 400 },
       );
     }
 
-    const promo = await PromoCode.findOne({
+    const coupon = await PromoCode.findOne({
       code: promoCode,
       packageName,
-      active: true,
+      status: "Unused",
     });
 
-    if (!promo) {
+    if (!coupon) {
       return NextResponse.json(
-        {
-          error: "Invalid promo code.",
-        },
-        {
-          status: 400,
-        },
+        { error: "Invalid or already used coupon code." },
+        { status: 400 },
       );
     }
 
-    if (promo.expiresAt && promo.expiresAt < new Date()) {
+    // Must be assigned before it can be used
+    if (!coupon.assignedEmail) {
       return NextResponse.json(
-        {
-          error: "Promo code expired.",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    if (promo.maxUses && promo.usedCount >= promo.maxUses) {
-      return NextResponse.json(
-        {
-          error: "Promo usage limit reached.",
-        },
-        {
-          status: 400,
-        },
+        { error: "Invalid or already used coupon code." },
+        { status: 400 },
       );
     }
 
     return NextResponse.json({
       success: true,
-
       valid: true,
-
-      message: "Promo code is valid.",
+      message: "Coupon code is valid.",
     });
   } catch (error) {
     console.error("PROMO CHECK ERROR:", error);
-
     return NextResponse.json(
-      {
-        error: "Failed to validate promo code.",
-      },
-      {
-        status: 500,
-      },
+      { error: "Failed to validate coupon code." },
+      { status: 500 },
     );
   }
 }
