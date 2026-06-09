@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import {
   Ticket,
   Search,
@@ -12,6 +13,7 @@ import {
   Clock,
   BarChart3,
   RefreshCw,
+  FileDown,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -93,6 +95,7 @@ export default function CouponManagementPage() {
   const [assignEmail, setAssignEmail] = useState("");
   const [assignLoading, setAssignLoading] = useState(false);
   const [assignError, setAssignError] = useState("");
+  const [exportLoading, setExportLoading] = useState(false);
 
   // ─── Fetch Stats ───────────────────────────────────────────────────────────
 
@@ -217,6 +220,61 @@ export default function CouponManagementPage() {
     }
   };
 
+  // ─── Export to Excel ───────────────────────────────────────────────────────
+
+  const handleExport = async () => {
+    if (!selectedPackage) return;
+    setExportLoading(true);
+    try {
+      // Fetch ALL coupons for the selected package (no pagination)
+      const params = new URLSearchParams({
+        packageName: selectedPackage,
+        page: "1",
+        pageSize: "9999",
+      });
+      const res = await fetch(`/api/admin/coupons?${params}`);
+      const data = await res.json();
+
+      if (!data.success || !data.coupons) return;
+
+      const rows = data.coupons.map((c: Coupon) => ({
+        "Coupon Code": c.code,
+        Package: c.packageName,
+        Status: c.status,
+        "Assigned Name": c.assignedName || "",
+        "Assigned Email": c.assignedEmail || "",
+        "Assigned At": c.assignedAt ? fmtDate(c.assignedAt) : "",
+        "Redeemed Name": c.redeemedName || "",
+        "Redeemed Email": c.redeemedEmail || "",
+        "Redeemed At": c.redeemedAt ? fmtDate(c.redeemedAt) : "",
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, selectedPackage);
+
+      // Column widths
+      ws["!cols"] = [
+        { wch: 18 }, // Coupon Code
+        { wch: 12 }, // Package
+        { wch: 10 }, // Status
+        { wch: 20 }, // Assigned Name
+        { wch: 28 }, // Assigned Email
+        { wch: 22 }, // Assigned At
+        { wch: 20 }, // Redeemed Name
+        { wch: 28 }, // Redeemed Email
+        { wch: 22 }, // Redeemed At
+      ];
+
+      const fileName = `${selectedPackage.replace(" ", "_")}_Coupons_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+    } catch (e) {
+      console.error("Export failed:", e);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   const selectedPkgConfig = PACKAGES.find((p) => p.name === selectedPackage);
 
   // ─── Render ────────────────────────────────────────────────────────────────
@@ -237,7 +295,7 @@ export default function CouponManagementPage() {
           </p>
         </div>
 
-        {/* Seed Button */}
+        {/* Action Buttons */}
         <div className="flex items-center gap-3">
           <button
             onClick={fetchStats}
@@ -246,6 +304,28 @@ export default function CouponManagementPage() {
           >
             <RefreshCw size={16} />
           </button>
+
+          {/* Export Button — visible only when a package is selected */}
+          {selectedPackage && (
+            <button
+              onClick={handleExport}
+              disabled={exportLoading}
+              className="flex items-center gap-2 border border-[#C8782A]/30 text-[#C8782A] hover:bg-[#C8782A]/8 disabled:opacity-60 text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            >
+              {exportLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-[#C8782A]/30 border-t-[#C8782A] rounded-full animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <FileDown size={15} />
+                  Export Excel
+                </>
+              )}
+            </button>
+          )}
+
           <button
             onClick={handleSeed}
             disabled={seeding}

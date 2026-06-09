@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -53,12 +54,35 @@ export default function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
 
-  // Demo Stats
-  const totalCoupons = 500;
-  const usedCoupons = 128;
+  // Real stats from backend
+  const [totalCoupons, setTotalCoupons] = useState(0);
+  const [usedCoupons, setUsedCoupons] = useState(0);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/coupons/stats")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.stats) {
+          const total = d.stats.reduce(
+            (sum: number, s: { total: number }) => sum + s.total,
+            0,
+          );
+          const used = d.stats.reduce(
+            (sum: number, s: { used: number }) => sum + s.used,
+            0,
+          );
+          setTotalCoupons(total);
+          setUsedCoupons(used);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setStatsLoading(false));
+  }, []);
 
   const usagePercentage =
     totalCoupons > 0 ? Math.round((usedCoupons / totalCoupons) * 100) : 0;
+
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -87,15 +111,18 @@ export default function AdminSidebar({
       {/* Overview Card */}
       <div className="px-4 pt-4">
         <div className="rounded-2xl border border-[#C8782A]/10 bg-[#FAF5EE] p-4">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#C8782A]/60">
-                Coupons
+                Coupons Overview
               </p>
-
-              <h3 className="text-sm font-semibold text-[#1C1C1C] mt-1">
-                Total-500
-              </h3>
+              {statsLoading ? (
+                <div className="h-4 w-20 bg-[#EADFD2] rounded animate-pulse mt-1" />
+              ) : (
+                <h3 className="text-sm font-semibold text-[#1C1C1C] mt-1">
+                  Total — {totalCoupons}
+                </h3>
+              )}
             </div>
 
             <div className="w-8 h-8 rounded-xl bg-[#C8782A]/10 flex items-center justify-center">
@@ -103,30 +130,38 @@ export default function AdminSidebar({
             </div>
           </div>
 
-          {/* <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-xl font-bold text-[#1C1C1C]">{totalCoupons}</p>
-
-              <p className="text-[11px] text-[#6B3A2A]/60">Total</p>
+          {/* Used / Unused row */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="bg-white rounded-xl p-2.5">
+              {statsLoading ? (
+                <div className="h-5 w-8 bg-[#EADFD2] rounded animate-pulse mb-1" />
+              ) : (
+                <p className="text-lg font-bold text-[#C8782A]">{usedCoupons}</p>
+              )}
+              <p className="text-[10px] text-[#6B3A2A]/60">Used</p>
             </div>
-
-            <div>
-              <p className="text-xl font-bold text-[#C8782A]">{usedCoupons}</p>
-
-              <p className="text-[11px] text-[#6B3A2A]/60">Used</p>
+            <div className="bg-white rounded-xl p-2.5">
+              {statsLoading ? (
+                <div className="h-5 w-8 bg-[#EADFD2] rounded animate-pulse mb-1" />
+              ) : (
+                <p className="text-lg font-bold text-[#1C1C1C]">
+                  {totalCoupons - usedCoupons}
+                </p>
+              )}
+              <p className="text-[10px] text-[#6B3A2A]/60">Unused</p>
             </div>
-          </div> */}
+          </div>
 
-          <div className="mt-4">
+          {/* Progress bar */}
+          <div>
             <div className="flex items-center justify-between text-[11px] text-[#6B3A2A]/60 mb-1">
               <span>Usage</span>
-              <span>{usagePercentage}%</span>
+              <span>{statsLoading ? "..." : `${usagePercentage}%`}</span>
             </div>
-
             <div className="h-1.5 bg-[#EADFD2] rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#C8782A] rounded-full"
-                style={{ width: `${usagePercentage}%` }}
+                className="h-full bg-[#C8782A] rounded-full transition-all duration-700"
+                style={{ width: statsLoading ? "0%" : `${usagePercentage}%` }}
               />
             </div>
           </div>

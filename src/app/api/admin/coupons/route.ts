@@ -19,6 +19,15 @@ export async function GET(request: NextRequest) {
 
     const packageName = searchParams.get("packageName") || "";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.max(
+      1,
+      parseInt(
+        searchParams.get("limit") ||
+          searchParams.get("pageSize") ||
+          String(PAGE_SIZE),
+        10,
+      ),
+    );
     const status = searchParams.get("status") || ""; // "Unused" | "Used" | ""
     const assigned = searchParams.get("assigned") || ""; // "true" | "false" | ""
     const search = searchParams.get("search") || "";
@@ -51,8 +60,8 @@ export async function GET(request: NextRequest) {
 
     const coupons = await PromoCode.find(filter)
       .sort({ createdAt: 1 })
-      .skip((page - 1) * PAGE_SIZE)
-      .limit(PAGE_SIZE)
+      .skip((page - 1) * limit)
+      .limit(limit)
       .select(
         "code packageName status assignedName assignedEmail assignedAt redeemedName redeemedEmail redeemedAt createdAt",
       )
@@ -64,8 +73,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         total,
         page,
-        pageSize: PAGE_SIZE,
-        totalPages: Math.ceil(total / PAGE_SIZE),
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
       },
     });
   } catch (error) {
