@@ -31,6 +31,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Must be assigned before it can be used
+    if (!coupon.assignedEmail) {
+      return NextResponse.json(
+        { error: "Invalid or already used coupon code." },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json({
       success: true,
       valid: true,

@@ -96,13 +96,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // PRE-CHECK: coupon must exist AND be assigned
+    const existingCoupon = await PromoCode.findOne({
+      code: promoCode,
+      packageName,
+      status: "Unused",
+    });
+
+    if (!existingCoupon) {
+      return NextResponse.json(
+        { error: "Invalid coupon code or coupon has already been used." },
+        { status: 400 },
+      );
+    }
+
+    // Guard: coupon must be assigned before use
+    if (!existingCoupon.assignedEmail) {
+      return NextResponse.json(
+        { error: "Invalid coupon code or coupon has already been used." },
+        { status: 400 },
+      );
+    }
+
     // ATOMIC REDEMPTION — findOneAndUpdate with status check to prevent race conditions
-    // Only succeeds if coupon is still "Unused" at the time of update
+    // Only succeeds if coupon is still "Unused" and is assigned at the time of update
     const redeemedCoupon = await PromoCode.findOneAndUpdate(
       {
         code: promoCode,
         packageName,
-        status: "Unused", // Race condition guard — atomic check + update
+        status: "Unused",
+        assignedEmail: { $ne: null }, // extra safety: only redeem if assigned
       },
       {
         $set: {
