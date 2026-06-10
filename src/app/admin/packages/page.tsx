@@ -33,6 +33,7 @@ interface PkgData {
   credits: number;
   expiryDays: number;
   unlimitedJobs: boolean;
+  active?: boolean;
 }
 
 // ─── Package icon map ──────────────────────────────────────────────────────
@@ -75,6 +76,7 @@ function PackageCard({
   const [credits, setCredits] = useState(pkg.credits || 0);
   const [expiryDays, setExpiryDays] = useState(pkg.expiryDays || 180);
   const [unlimitedJobs, setUnlimitedJobs] = useState(!!pkg.unlimitedJobs);
+  const [active, setActive] = useState(pkg.active !== false);
   const [features, setFeatures] = useState<string[]>(pkg.features);
 
   const Icon = ICON_MAP[pkg.name] || Package;
@@ -88,6 +90,7 @@ function PackageCard({
     credits !== (pkg.credits || 0) ||
     expiryDays !== (pkg.expiryDays || 180) ||
     unlimitedJobs !== !!pkg.unlimitedJobs ||
+    active !== (pkg.active !== false) ||
     JSON.stringify(features) !== JSON.stringify(pkg.features);
 
   const handleAddFeature = () => setFeatures((f) => [...f, ""]);
@@ -106,6 +109,7 @@ function PackageCard({
     setCredits(pkg.credits || 0);
     setExpiryDays(pkg.expiryDays || 180);
     setUnlimitedJobs(!!pkg.unlimitedJobs);
+    setActive(pkg.active !== false);
     setFeatures(pkg.features);
     setEditing(false);
   };
@@ -136,6 +140,7 @@ function PackageCard({
           credits,
           expiryDays,
           unlimitedJobs,
+          active,
         }),
       });
       const data = await res.json();
@@ -153,6 +158,7 @@ function PackageCard({
         credits,
         expiryDays,
         unlimitedJobs,
+        active,
       });
     } catch (e: any) {
       toast.error(e.message || "Something went wrong.");
@@ -193,6 +199,10 @@ function PackageCard({
                 <Lock size={10} className="text-[#6B3A2A]/40" />
                 <span className="text-[10px] text-[#6B3A2A]/50 font-semibold tracking-wider uppercase">
                   Name is fixed
+                </span>
+                <span className="text-[#6B3A2A]/30">•</span>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${pkg.active !== false ? "text-emerald-600" : "text-rose-500"}`}>
+                  {pkg.active !== false ? "Active" : "Inactive"}
                 </span>
               </div>
             </div>
@@ -307,25 +317,47 @@ function PackageCard({
             </div>
           </div>
 
-          {/* Unlimited Jobs Toggle */}
+          {/* Unlimited & Active Toggle */}
           {editing ? (
-            <div className="flex items-center gap-2 py-1">
-              <input
-                type="checkbox"
-                id={`unlimited-${pkg.name}`}
-                checked={unlimitedJobs}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setUnlimitedJobs(checked);
-                  if (checked) {
-                    setCredits(0);
-                  }
-                }}
-                className="rounded border-[#C8782A]/20 text-[#C8782A] focus:ring-[#C8782A]/30"
-              />
-              <label htmlFor={`unlimited-${pkg.name}`} className="text-xs font-semibold text-[#1C1C1C]">
-                Unlimited Job Postings
-              </label>
+            <div className="flex flex-col gap-2.5 py-1">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id={`unlimited-${pkg.name}`}
+                  checked={unlimitedJobs}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setUnlimitedJobs(checked);
+                    if (checked) {
+                      setCredits(0);
+                    }
+                  }}
+                  className="rounded border-[#C8782A]/20 text-[#C8782A] focus:ring-[#C8782A]/30"
+                />
+                <label htmlFor={`unlimited-${pkg.name}`} className="text-xs font-semibold text-[#1C1C1C]">
+                  Unlimited Job Postings
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between border border-[#C8782A]/10 rounded-xl px-3 py-2 bg-[#FAF5EE]/50">
+                <span className="text-xs font-semibold text-[#1C1C1C]">
+                  Active (Visible to public)
+                </span>
+                <button
+                  type="button"
+                  id={`active-toggle-${pkg.name}`}
+                  onClick={() => setActive(!active)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#C8782A]/20 ${
+                    active ? "bg-emerald-500" : "bg-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                      active ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           ) : (
             unlimitedJobs && (

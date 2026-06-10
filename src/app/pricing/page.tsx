@@ -351,16 +351,16 @@ export default function PricingPage() {
                     key={pkg.name}
                     variants={fadeUp}
                     whileHover={{ y: -6 }}
-                    className={`rounded-2xl p-6 sm:p-7 relative transition-all duration-200 flex flex-col h-full ${
+                    className={`rounded-2xl p-5 relative transition-all duration-200 flex flex-col h-full ${
                       pkg.highlight
                         ? "bg-[#C8782A] text-white ring-2 ring-[#C8782A] shadow-xl xl:-mt-4 xl:mb-4"
                         : "bg-[#FAF5EE] border border-[#C8782A]/10 hover:shadow-md"
                     }`}
                   >
                     {pkg.badge && (
-                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                         <span
-                          className={`text-[11px] font-bold px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap tracking-wide uppercase ${
+                          className={`text-[10px] font-bold px-3 py-1 rounded-full shadow-sm whitespace-nowrap tracking-wide uppercase ${
                             pkg.highlight
                               ? "bg-[#6B3A2A] text-white"
                               : "bg-[#C8782A] text-white"
@@ -373,12 +373,12 @@ export default function PricingPage() {
 
                     <div className="flex-grow">
                       <div
-                        className={`w-11 h-11 rounded-xl mb-5 flex items-center justify-center ${
+                        className={`w-9 h-9 rounded-xl mb-3 flex items-center justify-center ${
                           pkg.highlight ? "bg-white/20" : "bg-[#C8782A]/10"
                         }`}
                       >
                         <pkg.icon
-                          size={20}
+                          size={16}
                           className={
                             pkg.highlight ? "text-white" : "text-[#C8782A]"
                           }
@@ -386,7 +386,7 @@ export default function PricingPage() {
                       </div>
 
                       <h3
-                        className={`font-bold text-xl mb-1 ${
+                        className={`font-bold text-lg mb-0.5 ${
                           pkg.highlight ? "text-white" : "text-[#1C1C1C]"
                         }`}
                         style={{
@@ -397,17 +397,17 @@ export default function PricingPage() {
                       </h3>
 
                       <p
-                        className={`text-xs font-medium uppercase tracking-wider mb-3 ${
+                        className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${
                           pkg.highlight ? "text-white/70" : "text-[#6B3A2A]/60"
                         }`}
                       >
                         {pkg.tagline}
                       </p>
 
-                      <div className="mb-6 border-b border-dashed border-current/20 pb-4">
+                      <div className="mb-4 border-b border-dashed border-current/20 pb-3">
                         <div className="flex items-baseline gap-1.5">
                           <span
-                            className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+                            className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
                               pkg.highlight ? "text-white" : "text-[#1C1C1C]"
                             }`}
                           >
@@ -415,7 +415,7 @@ export default function PricingPage() {
                           </span>
 
                           <span
-                            className={`text-sm line-through ${
+                            className={`text-xs line-through ${
                               pkg.highlight
                                 ? "text-white/50"
                                 : "text-[#6B3A2A]/50"
@@ -426,7 +426,7 @@ export default function PricingPage() {
                         </div>
 
                         <p
-                          className={`text-[10px] font-bold tracking-widest mt-1 uppercase ${
+                          className={`text-[9px] font-bold tracking-widest mt-0.5 uppercase ${
                             pkg.highlight
                               ? "text-white/60"
                               : "text-[#6B3A2A]/60"
@@ -436,18 +436,18 @@ export default function PricingPage() {
                         </p>
                       </div>
 
-                      <ul className="flex flex-col gap-3 mb-8">
+                      <ul className="flex flex-col gap-2.5 mb-6">
                         {pkg.features.map((f) => (
                           <li
                             key={f}
-                            className={`flex items-start gap-2.5 text-sm leading-snug ${
+                            className={`flex items-start gap-2 text-xs leading-normal ${
                               pkg.highlight
                                 ? "text-white/90"
                                 : "text-[#1C1C1C]/70"
                             }`}
                           >
                             <CheckCircle
-                              size={15}
+                              size={13}
                               className={`flex-shrink-0 mt-0.5 ${
                                 pkg.highlight ? "text-white" : "text-[#7A9E7E]"
                               }`}
@@ -458,10 +458,10 @@ export default function PricingPage() {
                       </ul>
                     </div>
 
-                    <div className="mt-auto pt-2">
+                    <div className="mt-auto">
                       <Button
                         onClick={() => handleInitiatePurchase(pkg)}
-                        className={`w-full font-semibold transition-colors rounded-xl py-5 ${
+                        className={`w-full font-semibold transition-colors rounded-xl py-4.5 ${
                           pkg.highlight
                             ? "bg-white text-[#C8782A] hover:bg-[#FAF5EE]"
                             : "bg-[#C8782A] hover:bg-[#B06820] text-white"

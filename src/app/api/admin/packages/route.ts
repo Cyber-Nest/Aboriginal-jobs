@@ -49,6 +49,7 @@ export async function PUT(request: NextRequest) {
       credits,
       expiryDays,
       unlimitedJobs,
+      active,
     } = body;
 
     // Validate name is one of the fixed 5
@@ -105,6 +106,7 @@ export async function PUT(request: NextRequest) {
           credits,
           expiryDays,
           unlimitedJobs: !!unlimitedJobs,
+          active: active === undefined ? true : !!active,
           updatedAt: new Date(),
         },
       },

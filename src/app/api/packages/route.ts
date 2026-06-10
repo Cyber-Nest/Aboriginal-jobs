@@ -9,9 +9,9 @@ export async function GET() {
   try {
     await connectDB();
 
-    const packages = await Package.find()
+    const packages = await Package.find({ active: { $ne: false } })
       .sort({ order: 1 })
-      .select("name originalPrice discountedPrice tagline badge features highlight darkVariant order credits expiryDays unlimitedJobs")
+      .select("name originalPrice discountedPrice tagline badge features highlight darkVariant order credits expiryDays unlimitedJobs active")
       .lean();
 
     return NextResponse.json({ success: true, packages });
