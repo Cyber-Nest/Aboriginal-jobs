@@ -22,6 +22,8 @@ async function hmacSign(data: string, secret: string): Promise<string> {
 /**
  * Generate admin token
  */
+const ADMIN_TOKEN_EXPIRY_MS = 60 * 60 * 24 * 1000; // 1 day in milliseconds
+
 export async function generateAdminToken(email: string): Promise<string> {
   const secret =
     process.env.ADMIN_JWT_SECRET || "admin-secret-fallback";
@@ -48,6 +50,12 @@ export async function verifyAdminToken(
     const decoded = JSON.parse(
       Buffer.from(payload, "base64url").toString("utf-8"),
     );
+
+    // Check token expiry — 1 day 
+    if (!decoded.ts || Date.now() - decoded.ts > ADMIN_TOKEN_EXPIRY_MS) {
+      return null;
+    }
+
     return { email: decoded.email };
   } catch {
     return null;

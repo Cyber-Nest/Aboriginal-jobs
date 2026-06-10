@@ -39,6 +39,16 @@ export async function getAuth() {
     emailAndPassword: {
       enabled: true,
     },
+
+    session: {
+      // Session expire in 1 day
+      expiresIn: 60 * 60 * 24, // 86400 seconds = 1 day
+      updateAge: 0,
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 60 * 24, // Cookie expire in 1 day
+      },
+    },
   });
 
   _auth = auth as ReturnType<typeof betterAuth>;
