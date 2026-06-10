@@ -8,6 +8,7 @@ import { getAuth } from "@/lib/auth/auth";
 import { Employer } from "@/lib/models/Employer";
 import { PromoCode } from "@/lib/models/PromoCode";
 import { PaymentTransaction } from "@/lib/models/PaymentTransaction";
+import { Package } from "@/lib/models/Package";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const dbPackage = await Package.findOne({ name: packageName });
     const selectedPackage =
       PACKAGE_CONFIG[packageName as keyof typeof PACKAGE_CONFIG];
 
@@ -93,6 +95,8 @@ export async function POST(request: NextRequest) {
         },
       );
     }
+
+    const amount = dbPackage ? dbPackage.discountedPrice : selectedPackage.amount;
 
     const employer = await Employer.findOne({
       authUserId: session.user.id,
@@ -155,7 +159,7 @@ export async function POST(request: NextRequest) {
 
       packageName,
 
-      amount: selectedPackage.amount,
+      amount: amount,
 
       currency: "CAD",
 
@@ -190,7 +194,7 @@ export async function POST(request: NextRequest) {
               name: `${packageName} Package`,
             },
 
-            unit_amount: Math.round(selectedPackage.amount * 100),
+            unit_amount: Math.round(amount * 100),
           },
 
           quantity: 1,

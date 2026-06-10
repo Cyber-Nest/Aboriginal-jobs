@@ -77,83 +77,31 @@ function OrganicShape({ className }: { className?: string }) {
   );
 }
 
-const packages = [
-  {
-    icon: Star,
-    name: "Starter",
-    originalPrice: 25,
-    discountedPrice: 12.5,
-    tagline: "FEATURES OF STARTER PLAN",
-    features: [
-      "Job Post Expiry - 180 Days",
-      "Credit Never Expire",
-      "1 Job Posting",
-    ],
-    cta: "Select Package",
-    highlight: false,
-    badge: "50% OFF",
-  },
-  {
-    icon: Zap,
-    name: "Deluxe",
-    originalPrice: 95,
-    discountedPrice: 47.5,
-    tagline: "FEATURES OF DELUXE PLAN",
-    features: [
-      "Job Post Expiry - 180 Days",
-      "Credit Never Expire",
-      "5 Job Posting",
-    ],
-    cta: "Select Package",
-    highlight: true,
-    badge: "Most Popular • 50% OFF",
-  },
-  {
-    icon: Building2,
-    name: "Ultimate",
-    originalPrice: 195,
-    discountedPrice: 97.5,
-    tagline: "FEATURES OF ULTIMATE PLAN",
-    features: [
-      "Job Post Expiry - 180 Days",
-      "Credit Never Expire",
-      "10 Job Posting",
-    ],
-    cta: "Select Package",
-    highlight: false,
-    badge: "50% OFF",
-  },
-  {
-    icon: HeartHandshake,
-    name: "Pro Plan",
-    originalPrice: 380,
-    discountedPrice: 190,
-    tagline: "FEATURES OF PRO PLAN",
-    features: [
-      "Job Post Expiry - 180 Days",
-      "Credit Never Expire",
-      "20 Job Posting",
-    ],
-    cta: "Select Package",
-    highlight: false,
-    badge: "Best Value • 50% OFF",
-  },
-  {
-    icon: Crown,
-    name: "Unlimited",
-    originalPrice: 1350,
-    discountedPrice: 675,
-    tagline: "FEATURES OF UNLIMITED PLAN",
-    features: [
-      "Job Post Expiry - 365 Days",
-      "Unlimited Job Posting",
-      "Priority Employer Support",
-    ],
-    cta: "Select Package",
-    highlight: false,
-    badge: "Mega Deal • 50% OFF",
-  },
-];
+// Icon map — stays client-side (React components can't be stored in DB)
+const ICON_MAP: Record<string, React.ElementType> = {
+  Starter: Star,
+  Deluxe: Zap,
+  Ultimate: Building2,
+  "Pro Plan": HeartHandshake,
+  Unlimited: Crown,
+};
+
+// DB package shape
+interface PkgData {
+  _id: string;
+  name: string;
+  originalPrice: number;
+  discountedPrice: number;
+  tagline: string;
+  badge: string;
+  features: string[];
+  highlight: boolean;
+  darkVariant: boolean;
+  order: number;
+}
+
+// Enriched package (adds icon for rendering)
+type PkgDisplay = PkgData & { icon: React.ElementType };
 
 const faqs = [
   {
@@ -178,10 +126,40 @@ export default function PricingPage() {
   const router = useRouter();
   const { user, isAuthenticated, isPending } = useSession();
 
+  // Dynamic packages from backend
+  const [pkgList, setPkgList] = useState<PkgDisplay[]>([]);
+  const [pkgLoading, setPkgLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/packages?t=${Date.now()}`, { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) {
+          return r.json().then((d) => {
+            throw new Error(d.error || `HTTP error! status: ${r.status}`);
+          });
+        }
+        return r.json();
+      })
+      .then((data) => {
+        if (data.success && data.packages) {
+          const enriched: PkgDisplay[] = data.packages.map((p: PkgData) => ({
+            ...p,
+            icon: ICON_MAP[p.name] || Star,
+          }));
+          setPkgList(enriched);
+        } else {
+          throw new Error("Invalid packages data structure");
+        }
+      })
+      .catch((err) => {
+        console.error("PRICING FETCH ERROR:", err);
+        toast.error("Failed to load packages: " + err.message);
+      })
+      .finally(() => setPkgLoading(false));
+  }, []);
+
   const [loadingPackage, setLoadingPackage] = useState<string | null>(null);
-  const [selectedPkg, setSelectedPkg] = useState<(typeof packages)[0] | null>(
-    null,
-  );
+  const [selectedPkg, setSelectedPkg] = useState<PkgDisplay | null>(null);
 
   const [promoCode, setPromoCode] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
@@ -206,7 +184,7 @@ export default function PricingPage() {
     setPromoError("");
   };
 
-  const handleInitiatePurchase = (pkg: (typeof packages)[0]) => {
+  const handleInitiatePurchase = (pkg: PkgDisplay) => {
     if (isPending) return;
 
     if (!isAuthenticated) {
@@ -357,7 +335,17 @@ export default function PricingPage() {
             viewport={{ once: true }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 items-stretch pt-6"
           >
-            {packages.map((pkg) => (
+          {/* Loading skeleton */}
+          {pkgLoading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                className="rounded-2xl bg-[#FAF5EE] border border-[#C8782A]/10 h-96 animate-pulse"
+              />
+            ))
+          ) : (
+            pkgList.map((pkg) => (
               <motion.div
                 key={pkg.name}
                 variants={fadeUp}
@@ -472,11 +460,12 @@ export default function PricingPage() {
                         : "bg-[#C8782A] hover:bg-[#B06820] text-white"
                     }`}
                   >
-                    {pkg.cta}
+                    Select Package
                   </Button>
                 </div>
               </motion.div>
-            ))}
+            ))
+          )}
           </motion.div>
         </div>
       </section>
