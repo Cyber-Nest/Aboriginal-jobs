@@ -540,7 +540,7 @@ export default function AdminPackagesPage() {
       </div>
 
       {/* Info Banner */}
-      <div className="mb-6 flex items-start gap-3 bg-[#FAF5EE] border border-[#C8782A]/20 rounded-2xl px-5 py-4">
+      {/* <div className="mb-6 flex items-start gap-3 bg-[#FAF5EE] border border-[#C8782A]/20 rounded-2xl px-5 py-4">
         <Lock size={16} className="text-[#C8782A] flex-shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-[#1C1C1C]">
@@ -551,7 +551,7 @@ export default function AdminPackagesPage() {
             Changing names would break existing coupons, so only price, features and badge are editable.
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Cards Grid */}
       {loading ? (
