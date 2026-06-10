@@ -46,7 +46,9 @@ export default function AdminLayout({
 
   const pageTitle = pathname.startsWith("/admin/coupons")
     ? "Coupon Management"
-    : "Admin Panel";
+    : pathname.startsWith("/admin/packages")
+      ? "Package Management"
+      : "Admin Panel";
 
   return (
     <div className="min-h-screen bg-[#FAF5EE] flex">

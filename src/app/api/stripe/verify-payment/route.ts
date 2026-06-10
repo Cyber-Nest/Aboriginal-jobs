@@ -6,51 +6,9 @@ import { connectDB } from "@/lib/db/mongoose";
 import { EmployerPackage } from "@/lib/models/EmployerPackage";
 import { EmployerPackageHistory } from "@/lib/models/EmployerPackageHistory";
 import { PaymentTransaction } from "@/lib/models/PaymentTransaction";
+import { Package } from "@/lib/models/Package";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-const PACKAGE_CONFIG = {
-  Starter: {
-    credits: 1,
-    unlimitedJobs: false,
-    expiryDays: 180,
-    amount: 12.5,
-  },
-  // Starter: {
-  //   credits: 1,
-  //   unlimitedJobs: false,
-  //   expiryDays: 180,
-  //   amount: 0.50,
-  // },
-
-  Deluxe: {
-    credits: 5,
-    unlimitedJobs: false,
-    expiryDays: 180,
-    amount: 47.5,
-  },
-
-  Ultimate: {
-    credits: 10,
-    unlimitedJobs: false,
-    expiryDays: 180,
-    amount: 97.5,
-  },
-
-  "Pro Plan": {
-    credits: 20,
-    unlimitedJobs: false,
-    expiryDays: 180,
-    amount: 190,
-  },
-
-  Unlimited: {
-    credits: 0,
-    unlimitedJobs: true,
-    expiryDays: 365,
-    amount: 675,
-  },
-};
 
 export async function POST(req: NextRequest) {
   try {
@@ -141,8 +99,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const selectedPackage =
-      PACKAGE_CONFIG[packageName as keyof typeof PACKAGE_CONFIG];
+    const selectedPackage = await Package.findOne({ name: packageName });
 
     if (!selectedPackage) {
       return NextResponse.json(

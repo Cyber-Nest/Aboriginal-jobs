@@ -19,15 +19,15 @@ const NAV_ITEMS = [
     href: "/admin/coupons",
     icon: Ticket,
   },
+  {
+    label: "Packages",
+    href: "/admin/packages",
+    icon: Package,
+  },
   //   {
   //     label: "Users",
   //     href: "#",
   //     icon: Users,
-  //   },
-  //   {
-  //     label: "Packages",
-  //     href: "#",
-  //     icon: Package,
   //   },
   //   {
   //     label: "Transactions",

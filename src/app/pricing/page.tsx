@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth/auth-client";
@@ -77,83 +78,31 @@ function OrganicShape({ className }: { className?: string }) {
   );
 }
 
-const packages = [
-  {
-    icon: Star,
-    name: "Starter",
-    originalPrice: 25,
-    discountedPrice: 12.5,
-    tagline: "FEATURES OF STARTER PLAN",
-    features: [
-      "Job Post Expiry - 180 Days",
-      "Credit Never Expire",
-      "1 Job Posting",
-    ],
-    cta: "Select Package",
-    highlight: false,
-    badge: "50% OFF",
-  },
-  {
-    icon: Zap,
-    name: "Deluxe",
-    originalPrice: 95,
-    discountedPrice: 47.5,
-    tagline: "FEATURES OF DELUXE PLAN",
-    features: [
-      "Job Post Expiry - 180 Days",
-      "Credit Never Expire",
-      "5 Job Posting",
-    ],
-    cta: "Select Package",
-    highlight: true,
-    badge: "Most Popular • 50% OFF",
-  },
-  {
-    icon: Building2,
-    name: "Ultimate",
-    originalPrice: 195,
-    discountedPrice: 97.5,
-    tagline: "FEATURES OF ULTIMATE PLAN",
-    features: [
-      "Job Post Expiry - 180 Days",
-      "Credit Never Expire",
-      "10 Job Posting",
-    ],
-    cta: "Select Package",
-    highlight: false,
-    badge: "50% OFF",
-  },
-  {
-    icon: HeartHandshake,
-    name: "Pro Plan",
-    originalPrice: 380,
-    discountedPrice: 190,
-    tagline: "FEATURES OF PRO PLAN",
-    features: [
-      "Job Post Expiry - 180 Days",
-      "Credit Never Expire",
-      "20 Job Posting",
-    ],
-    cta: "Select Package",
-    highlight: false,
-    badge: "Best Value • 50% OFF",
-  },
-  {
-    icon: Crown,
-    name: "Unlimited",
-    originalPrice: 1350,
-    discountedPrice: 675,
-    tagline: "FEATURES OF UNLIMITED PLAN",
-    features: [
-      "Job Post Expiry - 365 Days",
-      "Unlimited Job Posting",
-      "Priority Employer Support",
-    ],
-    cta: "Select Package",
-    highlight: false,
-    badge: "Mega Deal • 50% OFF",
-  },
-];
+// Icon map — stays client-side (React components can't be stored in DB)
+const ICON_MAP: Record<string, React.ElementType> = {
+  Starter: Star,
+  Deluxe: Zap,
+  Ultimate: Building2,
+  "Pro Plan": HeartHandshake,
+  Unlimited: Crown,
+};
+
+// DB package shape
+interface PkgData {
+  _id: string;
+  name: string;
+  originalPrice: number;
+  discountedPrice: number;
+  tagline: string;
+  badge: string;
+  features: string[];
+  highlight: boolean;
+  darkVariant: boolean;
+  order: number;
+}
+
+// Enriched package (adds icon for rendering)
+type PkgDisplay = PkgData & { icon: React.ElementType };
 
 const faqs = [
   {
@@ -178,10 +127,41 @@ export default function PricingPage() {
   const router = useRouter();
   const { user, isAuthenticated, isPending } = useSession();
 
+  // Dynamic packages from backend
+  const {
+    data: packagesResponse,
+    isLoading: pkgLoading,
+    error,
+  } = useQuery({
+    queryKey: ["packages"],
+    queryFn: async () => {
+      const res = await fetch("/api/packages", {
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch packages");
+      }
+
+      return res.json();
+    },
+
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  const pkgList = useMemo(() => {
+    const packages = packagesResponse?.packages || [];
+
+    return packages.map((p: PkgData) => ({
+      ...p,
+      icon: ICON_MAP[p.name] || Star,
+    }));
+  }, [packagesResponse]);
+
   const [loadingPackage, setLoadingPackage] = useState<string | null>(null);
-  const [selectedPkg, setSelectedPkg] = useState<(typeof packages)[0] | null>(
-    null,
-  );
+  const [selectedPkg, setSelectedPkg] = useState<PkgDisplay | null>(null);
 
   const [promoCode, setPromoCode] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
@@ -206,7 +186,7 @@ export default function PricingPage() {
     setPromoError("");
   };
 
-  const handleInitiatePurchase = (pkg: (typeof packages)[0]) => {
+  const handleInitiatePurchase = (pkg: PkgDisplay) => {
     if (isPending) return;
 
     if (!isAuthenticated) {
@@ -357,126 +337,141 @@ export default function PricingPage() {
             viewport={{ once: true }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 items-stretch pt-6"
           >
-            {packages.map((pkg) => (
-              <motion.div
-                key={pkg.name}
-                variants={fadeUp}
-                whileHover={{ y: -6 }}
-                className={`rounded-2xl p-6 sm:p-7 relative transition-all duration-200 flex flex-col h-full ${
-                  pkg.highlight
-                    ? "bg-[#C8782A] text-white ring-2 ring-[#C8782A] shadow-xl xl:-mt-4 xl:mb-4"
-                    : "bg-[#FAF5EE] border border-[#C8782A]/10 hover:shadow-md"
-                }`}
-              >
-                {pkg.badge && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-                    <span
-                      className={`text-[11px] font-bold px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap tracking-wide uppercase ${
-                        pkg.highlight
-                          ? "bg-[#6B3A2A] text-white"
-                          : "bg-[#C8782A] text-white"
-                      }`}
-                    >
-                      {pkg.badge}
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex-grow">
-                  <div
-                    className={`w-11 h-11 rounded-xl mb-5 flex items-center justify-center ${
-                      pkg.highlight ? "bg-white/20" : "bg-[#C8782A]/10"
+            {/* Loading skeleton */}
+            {pkgLoading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    variants={fadeUp}
+                    className="rounded-2xl bg-[#FAF5EE] border border-[#C8782A]/10 h-96 animate-pulse"
+                  />
+                ))
+              : pkgList.map((pkg: PkgDisplay) => (
+                  <motion.div
+                    key={pkg.name}
+                    variants={fadeUp}
+                    whileHover={{ y: -6 }}
+                    className={`rounded-2xl p-5 relative transition-all duration-200 flex flex-col h-full ${
+                      pkg.highlight
+                        ? "bg-[#C8782A] text-white ring-2 ring-[#C8782A] shadow-xl xl:-mt-4 xl:mb-4"
+                        : "bg-[#FAF5EE] border border-[#C8782A]/10 hover:shadow-md"
                     }`}
                   >
-                    <pkg.icon
-                      size={20}
-                      className={
-                        pkg.highlight ? "text-white" : "text-[#C8782A]"
-                      }
-                    />
-                  </div>
+                    {pkg.badge && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                        <span
+                          className={`text-[10px] font-bold px-3 py-1 rounded-full shadow-sm whitespace-nowrap tracking-wide uppercase ${
+                            pkg.highlight
+                              ? "bg-[#6B3A2A] text-white"
+                              : "bg-[#C8782A] text-white"
+                          }`}
+                        >
+                          {pkg.badge}
+                        </span>
+                      </div>
+                    )}
 
-                  <h3
-                    className={`font-bold text-xl mb-1 ${
-                      pkg.highlight ? "text-white" : "text-[#1C1C1C]"
-                    }`}
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                    }}
-                  >
-                    {pkg.name}
-                  </h3>
+                    <div className="flex-grow">
+                      <div
+                        className={`w-9 h-9 rounded-xl mb-3 flex items-center justify-center ${
+                          pkg.highlight ? "bg-white/20" : "bg-[#C8782A]/10"
+                        }`}
+                      >
+                        <pkg.icon
+                          size={16}
+                          className={
+                            pkg.highlight ? "text-white" : "text-[#C8782A]"
+                          }
+                        />
+                      </div>
 
-                  <p
-                    className={`text-xs font-medium uppercase tracking-wider mb-3 ${
-                      pkg.highlight ? "text-white/70" : "text-[#6B3A2A]/60"
-                    }`}
-                  >
-                    {pkg.tagline}
-                  </p>
-
-                  <div className="mb-6 border-b border-dashed border-current/20 pb-4">
-                    <div className="flex items-baseline gap-1.5">
-                      <span
-                        className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+                      <h3
+                        className={`font-bold text-lg mb-0.5 ${
                           pkg.highlight ? "text-white" : "text-[#1C1C1C]"
                         }`}
+                        style={{
+                          fontFamily: "'Playfair Display', serif",
+                        }}
                       >
-                        ${pkg.discountedPrice}
-                      </span>
+                        {pkg.name}
+                      </h3>
 
-                      <span
-                        className={`text-sm line-through ${
-                          pkg.highlight ? "text-white/50" : "text-[#6B3A2A]/50"
+                      <p
+                        className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${
+                          pkg.highlight ? "text-white/70" : "text-[#6B3A2A]/60"
                         }`}
                       >
-                        ${pkg.originalPrice}
-                      </span>
+                        {pkg.tagline}
+                      </p>
+
+                      <div className="mb-4 border-b border-dashed border-current/20 pb-3">
+                        <div className="flex items-baseline gap-1.5">
+                          <span
+                            className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
+                              pkg.highlight ? "text-white" : "text-[#1C1C1C]"
+                            }`}
+                          >
+                            ${pkg.discountedPrice}
+                          </span>
+
+                          <span
+                            className={`text-xs line-through ${
+                              pkg.highlight
+                                ? "text-white/50"
+                                : "text-[#6B3A2A]/50"
+                            }`}
+                          >
+                            ${pkg.originalPrice}
+                          </span>
+                        </div>
+
+                        <p
+                          className={`text-[9px] font-bold tracking-widest mt-0.5 uppercase ${
+                            pkg.highlight
+                              ? "text-white/60"
+                              : "text-[#6B3A2A]/60"
+                          }`}
+                        >
+                          CAD • One-Time
+                        </p>
+                      </div>
+
+                      <ul className="flex flex-col gap-2.5 mb-6">
+                        {pkg.features.map((f) => (
+                          <li
+                            key={f}
+                            className={`flex items-start gap-2 text-xs leading-normal ${
+                              pkg.highlight
+                                ? "text-white/90"
+                                : "text-[#1C1C1C]/70"
+                            }`}
+                          >
+                            <CheckCircle
+                              size={13}
+                              className={`flex-shrink-0 mt-0.5 ${
+                                pkg.highlight ? "text-white" : "text-[#7A9E7E]"
+                              }`}
+                            />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
 
-                    <p
-                      className={`text-[10px] font-bold tracking-widest mt-1 uppercase ${
-                        pkg.highlight ? "text-white/60" : "text-[#6B3A2A]/60"
-                      }`}
-                    >
-                      CAD • One-Time
-                    </p>
-                  </div>
-
-                  <ul className="flex flex-col gap-3 mb-8">
-                    {pkg.features.map((f) => (
-                      <li
-                        key={f}
-                        className={`flex items-start gap-2.5 text-sm leading-snug ${
-                          pkg.highlight ? "text-white/90" : "text-[#1C1C1C]/70"
+                    <div className="mt-auto">
+                      <Button
+                        onClick={() => handleInitiatePurchase(pkg)}
+                        className={`w-full font-semibold transition-colors rounded-xl py-4.5 ${
+                          pkg.highlight
+                            ? "bg-white text-[#C8782A] hover:bg-[#FAF5EE]"
+                            : "bg-[#C8782A] hover:bg-[#B06820] text-white"
                         }`}
                       >
-                        <CheckCircle
-                          size={15}
-                          className={`flex-shrink-0 mt-0.5 ${
-                            pkg.highlight ? "text-white" : "text-[#7A9E7E]"
-                          }`}
-                        />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="mt-auto pt-2">
-                  <Button
-                    onClick={() => handleInitiatePurchase(pkg)}
-                    className={`w-full font-semibold transition-colors rounded-xl py-5 ${
-                      pkg.highlight
-                        ? "bg-white text-[#C8782A] hover:bg-[#FAF5EE]"
-                        : "bg-[#C8782A] hover:bg-[#B06820] text-white"
-                    }`}
-                  >
-                    {pkg.cta}
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
+                        Select Package
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
           </motion.div>
         </div>
       </section>
@@ -620,11 +615,16 @@ export default function PricingPage() {
 
       <section className="bg-[#FAF5EE] py-16 lg:py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          {error && (
+            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-600">
+              {(error as Error).message}
+            </div>
+          )}
+
           <motion.div
             variants={stagger}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
             className="text-center mb-12"
           >
             <motion.h2
