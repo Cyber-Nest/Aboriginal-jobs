@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { Package } from "@/lib/models/Package";
 
-// export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 // GET /api/packages — public endpoint for pricing page 
 export async function GET() {

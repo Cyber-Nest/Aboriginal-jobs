@@ -130,12 +130,12 @@ export default function PricingPage() {
   // Dynamic packages from backend
   const {
     data: packagesResponse,
-    isLoading: pkgLoading,
+    isPending: pkgLoading,
     error,
   } = useQuery({
     queryKey: ["packages"],
     queryFn: async () => {
-      const res = await fetch("/api/packages", {
+      const res = await fetch(`/api/packages?_t=${Date.now()}`, {
         cache: "no-store",
       });
 
@@ -333,8 +333,7 @@ export default function PricingPage() {
           <motion.div
             variants={stagger}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 items-stretch pt-6"
           >
             {/* Loading skeleton */}
