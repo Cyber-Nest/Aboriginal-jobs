@@ -107,6 +107,7 @@ function LoginForm() {
         toast.error(errMsg);
       } else {
         toast.success('Signed in successfully!');
+        router.refresh();
         router.replace(from);
       }
     } catch {

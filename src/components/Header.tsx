@@ -282,7 +282,9 @@ export default function Header() {
 
             {/* POST JOB BUTTON */}
 
-            {!isAuthenticated ? (
+            {isPending ? (
+              <div className="w-[140px] h-10 rounded-md bg-[#C8782A]/10 animate-pulse" />
+            ) : !isAuthenticated ? (
               <Link href="/login">
                 <Button className="bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold px-5 shadow-sm hover:shadow-md transition-all duration-200">
                   Post a Job
@@ -297,7 +299,7 @@ export default function Header() {
                 </Button>
               </Link>
             ) : (
-              <Link href="/post-a-job">
+              <Link href="/post-a-job" prefetch={false}>
                 <Button className="bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold px-5 shadow-sm hover:shadow-md transition-all duration-200">
                   Post a Job
                 </Button>
@@ -344,6 +346,7 @@ export default function Header() {
             {isAuthenticated && isEmployer && (
               <Link
                 href="/employers/dashboard"
+                prefetch={false}
                 className="px-4 py-3 rounded-lg text-sm font-medium text-[#6B3A2A] hover:bg-[#C8782A]/10 hover:text-[#C8782A] flex items-center gap-2"
               >
                 <LayoutDashboard size={16} />
@@ -384,8 +387,10 @@ export default function Header() {
 
               {/* MOBILE POST JOB BUTTON */}
 
-              {!isAuthenticated ? (
-                <Link href="/login">
+              {isPending ? (
+                <div className="w-full h-10 rounded-md bg-[#C8782A]/10 animate-pulse" />
+              ) : !isAuthenticated ? (
+                <Link href="/login" onClick={() => setMenuOpen(false)}>
                   <Button className="w-full bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold">
                     Post a Job
                   </Button>
@@ -399,7 +404,7 @@ export default function Header() {
                   </Button>
                 </Link>
               ) : (
-                <Link href="/post-a-job">
+                <Link href="/post-a-job" onClick={() => setMenuOpen(false)} prefetch={false}>
                   <Button className="w-full bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold">
                     Post a Job
                   </Button>

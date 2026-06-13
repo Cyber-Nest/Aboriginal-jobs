@@ -17,7 +17,8 @@ export function middleware(req: NextRequest) {
   // ─── EMPLOYER ROUTE PROTECTION ────────────────────────────────────────────
   const token =
     req.cookies.get("better-auth.session_token")?.value ||
-    req.cookies.get("__Secure-better-auth.session_token")?.value;
+    req.cookies.get("__Secure-better-auth.session_token")?.value ||
+    req.cookies.get("__Host-better-auth.session_token")?.value;
 
   const protectedRoutes = ["/post-a-job", "/employers/dashboard"];
 
