@@ -107,8 +107,7 @@ function LoginForm() {
         toast.error(errMsg);
       } else {
         toast.success('Signed in successfully!');
-        router.refresh();
-        router.replace(from);
+        window.location.href = from;
       }
     } catch {
       setServerError('Something went wrong. Please try again.');
