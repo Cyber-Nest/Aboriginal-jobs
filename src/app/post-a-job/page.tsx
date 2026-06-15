@@ -134,7 +134,7 @@ const validateNocCode = (code: string): boolean => {
 // Salary: number or range (e.g., 20 or 20-35)
 const validateSalary = (salary: string): boolean => {
   if (!salary) return true;
-  return /^\d+(\s*-\s*\d+)?$/.test(salary);
+  return /^\d+(\.\d+)?(\s*-\s*\d+(\.\d+)?)?$/.test(salary);
 };
 
 // Website URL validation
@@ -441,7 +441,7 @@ function PostAJobContent() {
   const [salaryType, setSalaryType] = useState("hour");
   const [nocCode, setNocCode] = useState("");
   const [runDays, setRunDays] = useState("30");
-  const [vacancies, setVacancies] = useState<number | "">("");
+  const [vacancies, setVacancies] = useState<number | "">(1);
   const [experience, setExperience] = useState("");
   const [startDate, setStartDate] = useState("");
   const [website, setWebsite] = useState("");
@@ -1326,11 +1326,17 @@ function PostAJobContent() {
                     <Input
                       type="number"
                       value={vacancies}
-                      onChange={(e) =>
-                        setVacancies(
-                          e.target.value === "" ? "" : Number(e.target.value),
-                        )
-                      }
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const numVal = val === "" ? "" : Number(val);
+                        setVacancies(numVal);
+                        
+                        if (val !== "" && Number(val) < 1) {
+                          setErrors((prev) => ({ ...prev, vacancies: "Vacancies must be at least 1" }));
+                        } else {
+                          setErrors((prev) => ({ ...prev, vacancies: "" }));
+                        }
+                      }}
                       placeholder="e.g. 5"
                       className="placeholder:text-[#1C1C1C]/30"
                     />
