@@ -526,20 +526,20 @@ function RegisterForm() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <Link href="/post-a-job">
+              <a href="/post-a-job">
                 <Button className="w-full bg-[#C8782A] hover:bg-[#B06820] text-white font-semibold">
                   Post Your First Job
                   <ChevronRight size={15} className="ml-1" />
                 </Button>
-              </Link>
-              <Link href="/employers/dashboard">
+              </a>
+              <a href="/employers/dashboard">
                 <Button
                   variant="outline"
                   className="w-full border-[#C8782A]/25 text-[#6B3A2A] hover:bg-[#C8782A]/5 hover:text-black font-medium"
                 >
                   Go to Dashboard
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </motion.div>

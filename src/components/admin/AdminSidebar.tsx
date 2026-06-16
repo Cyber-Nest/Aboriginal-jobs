@@ -12,6 +12,7 @@ import {
   Receipt,
   BarChart3,
   Building2,
+  CreditCard,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -29,6 +30,11 @@ const NAV_ITEMS = [
     label: "Employers",
     href: "/admin/employers",
     icon: Building2,
+  },
+  {
+    label: "Payments",
+    href: "/admin/payments",
+    icon: CreditCard,
   },
   //   {
   //     label: "Users",

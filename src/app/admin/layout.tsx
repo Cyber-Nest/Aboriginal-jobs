@@ -50,7 +50,9 @@ export default function AdminLayout({
       ? "Package Management"
       : pathname.startsWith("/admin/employers")
         ? "Employer Management"
-        : "Admin Panel";
+        : pathname.startsWith("/admin/payments")
+          ? "Payment Management"
+          : "Admin Panel";
 
   return (
     <div className="min-h-screen bg-[#FAF5EE] flex">

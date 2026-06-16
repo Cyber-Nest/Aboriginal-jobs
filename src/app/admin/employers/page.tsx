@@ -14,6 +14,8 @@ import {
   User,
   Mail,
   ChevronLeft,
+  CreditCard,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -22,7 +24,13 @@ interface EmployerData {
   orgName: string;
   province: string;
   website: string;
-  package: { packageName: string; status: string } | null;
+  package: { 
+    packageName: string; 
+    status: string;
+    totalCreditsPurchased?: number;
+    remainingCredits?: number;
+    unlimitedJobs?: boolean;
+  } | null;
   jobCount: number;
   createdAt: string;
   name?: string;
@@ -225,6 +233,27 @@ export default function AdminEmployersPage() {
                     </span>
                     <span className="font-bold text-[#1C1C1C] bg-[#FAF5EE] px-2 py-0.5 rounded-md">
                       {emp.jobCount}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-[#6B3A2A]/80 font-medium">
+                      <CreditCard size={14} className="text-[#C8782A]" />
+                      Total Credits
+                    </span>
+                    <span className="font-bold text-[#1C1C1C] bg-[#FAF5EE] px-2 py-0.5 rounded-md">
+                      {emp.package?.unlimitedJobs ? "Unlimited" : emp.package?.totalCreditsPurchased || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-[#6B3A2A]/80 font-medium">
+                      <CheckCircle2 size={14} className="text-[#C8782A]" />
+                      Used Credits
+                    </span>
+                    <span className="font-bold text-[#1C1C1C] bg-[#FAF5EE] px-2 py-0.5 rounded-md">
+                      {emp.package?.unlimitedJobs 
+                        ? "N/A" 
+                        : ((emp.package?.totalCreditsPurchased || 0) - (emp.package?.remainingCredits || 0))}
                     </span>
                   </div>
                 </div>

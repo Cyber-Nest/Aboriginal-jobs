@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       province,
     });
 
-    await EmployerPackage.create({
+    const freePackage = await EmployerPackage.create({
       employerId: employer._id,
       packageName: "Free Plan",
       remainingCredits: 1,
@@ -92,6 +92,9 @@ export async function POST(request: NextRequest) {
       expiresAt: null,
       creditExpiresAt: null,
     });
+
+    employer.currentPackageId = freePackage._id;
+    await employer.save();
 
     // Delete verification records
     await Verification.deleteMany({

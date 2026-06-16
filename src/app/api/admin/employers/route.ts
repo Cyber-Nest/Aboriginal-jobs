@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       .populate({
         path: "currentPackageId",
         model: EmployerPackage,
-        select: "packageName status",
+        select: "packageName status totalCreditsPurchased remainingCredits unlimitedJobs",
       })
       .sort({ createdAt: -1 })
       .lean();
