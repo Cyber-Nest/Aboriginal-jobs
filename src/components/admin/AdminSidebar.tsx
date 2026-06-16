@@ -11,6 +11,7 @@ import {
   Package,
   Receipt,
   BarChart3,
+  Building2,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -23,6 +24,11 @@ const NAV_ITEMS = [
     label: "Packages",
     href: "/admin/packages",
     icon: Package,
+  },
+  {
+    label: "Employers",
+    href: "/admin/employers",
+    icon: Building2,
   },
   //   {
   //     label: "Users",

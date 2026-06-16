@@ -48,7 +48,9 @@ export default function AdminLayout({
     ? "Coupon Management"
     : pathname.startsWith("/admin/packages")
       ? "Package Management"
-      : "Admin Panel";
+      : pathname.startsWith("/admin/employers")
+        ? "Employer Management"
+        : "Admin Panel";
 
   return (
     <div className="min-h-screen bg-[#FAF5EE] flex">
