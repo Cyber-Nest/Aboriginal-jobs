@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
-
+import { connectDB } from "@/lib/db/mongoose";
+import { Admin } from "@/lib/models/Admin";
+import { encryptPassword, decryptPassword } from "./crypto";
 const ADMIN_TOKEN_NAME = "admin_token";
 
 /**
@@ -56,6 +58,11 @@ export async function verifyAdminToken(
       return null;
     }
 
+    // Verify against DB
+    await connectDB();
+    const admin = await Admin.findOne({ email: decoded.email.toLowerCase() });
+    if (!admin) return null;
+
     return { email: decoded.email };
   } catch {
     return null;
@@ -74,3 +81,4 @@ export async function requireAdmin(
 }
 
 export { ADMIN_TOKEN_NAME };
+

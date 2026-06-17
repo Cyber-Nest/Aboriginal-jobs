@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateAdminToken, ADMIN_TOKEN_NAME } from "@/lib/admin/adminAuth";
+import { connectDB } from "@/lib/db/mongoose";
+import { Admin } from "@/lib/models/Admin";
+import { decryptPassword } from "@/lib/admin/crypto";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,21 +16,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    await connectDB();
+    const admin = await Admin.findOne({ email: email.toLowerCase() });
 
-    if (!adminEmail || !adminPassword) {
+    if (!admin) {
       return NextResponse.json(
-        { error: "Admin credentials not configured." },
-        { status: 500 },
+        { error: "Invalid credentials." },
+        { status: 401 },
       );
     }
 
-    // Simple direct comparison — no hashing
-    if (
-      email.toLowerCase() !== adminEmail.toLowerCase() ||
-      password !== adminPassword
-    ) {
+    // Verify using decrypted password comparison
+    const decrypted = decryptPassword(admin.password);
+    if (decrypted !== password) {
       return NextResponse.json(
         { error: "Invalid credentials." },
         { status: 401 },

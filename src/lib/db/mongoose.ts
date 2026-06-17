@@ -4,6 +4,7 @@
  */
 
 import mongoose from "mongoose";
+import { encryptPassword } from "@/lib/admin/crypto";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -45,6 +46,39 @@ export async function connectDB(): Promise<typeof mongoose> {
   }
 
   cached!.conn = await cached!.promise;
+
+  // Seed Admin if not exists
+  try {
+    const { Admin } = await import("../models/Admin");
+    const count = await Admin.countDocuments();
+    if (count === 0) {
+      const email = process.env.ADMIN_EMAIL || "admin@gmail.com.ca";
+      const password = process.env.ADMIN_PASSWORD || "Admin@12345";
+      const encryptedPassword = encryptPassword(password);
+      await Admin.create({
+        email: email.toLowerCase(),
+        password: encryptedPassword,
+        emailChangeCount: 0,
+      });
+      console.log("Admin seeded to database (encrypted):", email);
+    } else {
+      // Auto-migrate any existing plain or bcrypt passwords in DB to encrypted format
+      const admin = await Admin.findOne();
+      if (admin) {
+        const isBcrypt = admin.password.startsWith("$2") && admin.password.length === 60;
+        const isPlaintext = !admin.password.includes(":");
+        
+        if (isBcrypt || isPlaintext) {
+          const defaultPassword = process.env.ADMIN_PASSWORD || "Admin@12345";
+          const encrypted = encryptPassword(defaultPassword);
+          await Admin.updateOne({ _id: admin._id }, { $set: { password: encrypted } });
+          console.log("Admin password migrated/re-seeded to encrypted format in DB.");
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error seeding admin in connectDB:", error);
+  }
 
   return cached!.conn;
 }

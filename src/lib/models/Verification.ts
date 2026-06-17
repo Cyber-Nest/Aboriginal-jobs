@@ -19,7 +19,7 @@ const VerificationSchema = new Schema(
     },
     purpose: {
       type: String,
-      enum: ["registration", "password_reset", "email_verification"],
+      enum: ["registration", "password_reset", "email_verification", "admin_change"],
       default: "registration",
       required: true,
     },

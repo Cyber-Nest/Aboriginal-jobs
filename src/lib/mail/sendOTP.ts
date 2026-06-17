@@ -3,7 +3,7 @@ import { transporter } from "./transporter";
 export const sendOTP = async (
   email: string,
   otp: string,
-  purpose: "registration" | "password_reset" = "registration",
+  purpose: "registration" | "password_reset" | "admin_change" = "registration",
 ) => {
   try {
     // Dynamic Content
@@ -23,6 +23,14 @@ export const sendOTP = async (
         subHeading: "We received a request to reset your password.",
         instruction:
           "Use the verification code below to continue resetting your password.",
+      },
+
+      admin_change: {
+        subject: "Aboriginal Jobs Canada | Admin Credential Change OTP",
+        heading: "Admin Credential Change Verification",
+        subHeading: "We received a request to change your admin email and/or password.",
+        instruction:
+          "Use the verification code below to verify your identity and confirm these changes.",
       },
     };
 

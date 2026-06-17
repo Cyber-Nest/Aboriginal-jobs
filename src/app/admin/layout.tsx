@@ -48,7 +48,11 @@ export default function AdminLayout({
     ? "Coupon Management"
     : pathname.startsWith("/admin/packages")
       ? "Package Management"
-      : "Admin Panel";
+      : pathname.startsWith("/admin/employers")
+        ? "Employer Management"
+        : pathname.startsWith("/admin/payments")
+          ? "Payment Management"
+          : "Admin Panel";
 
   return (
     <div className="min-h-screen bg-[#FAF5EE] flex">
@@ -83,6 +87,7 @@ export default function AdminLayout({
         <AdminTopbar
           title={pageTitle}
           onMenuClick={() => setSidebarOpen(true)}
+          onProfileUpdate={(newEmail) => setAdminEmail(newEmail)}
         />
 
         <main className="flex-1 p-4 lg:p-8">{children}</main>
