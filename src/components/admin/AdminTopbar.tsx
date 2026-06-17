@@ -1,13 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { Menu, CalendarDays } from "lucide-react";
+import AdminProfileModal from "./AdminProfileModal";
 
 interface AdminTopbarProps {
   title: string;
   onMenuClick: () => void;
+  onProfileUpdate?: (newEmail: string) => void;
 }
 
-export default function AdminTopbar({ title, onMenuClick }: AdminTopbarProps) {
+export default function AdminTopbar({
+  title,
+  onMenuClick,
+  onProfileUpdate,
+}: AdminTopbarProps) {
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
   const currentDate = new Date().toLocaleDateString("en-CA", {
     day: "2-digit",
     month: "short",
@@ -53,8 +62,11 @@ export default function AdminTopbar({ title, onMenuClick }: AdminTopbarProps) {
           </span>
         </div>
 
-        {/* Admin */}
-        <div className="flex items-center gap-3 pl-4 border-l border-[#C8782A]/10">
+        {/* Admin clickable button */}
+        <button
+          onClick={() => setIsProfileOpen(true)}
+          className="flex items-center gap-3 pl-4 border-l border-[#C8782A]/10 text-left hover:opacity-80 transition-opacity focus:outline-none"
+        >
           <div className="w-11 h-11 rounded-full bg-[#C8782A] text-white flex items-center justify-center text-sm font-bold shadow-sm">
             AD
           </div>
@@ -66,8 +78,15 @@ export default function AdminTopbar({ title, onMenuClick }: AdminTopbarProps) {
 
             <p className="text-xs text-[#6B3A2A]/50 mt-1">Super Admin</p>
           </div>
-        </div>
+        </button>
       </div>
+
+      <AdminProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        onSuccess={onProfileUpdate}
+      />
     </header>
   );
 }
+

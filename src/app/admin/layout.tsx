@@ -87,6 +87,7 @@ export default function AdminLayout({
         <AdminTopbar
           title={pageTitle}
           onMenuClick={() => setSidebarOpen(true)}
+          onProfileUpdate={(newEmail) => setAdminEmail(newEmail)}
         />
 
         <main className="flex-1 p-4 lg:p-8">{children}</main>
